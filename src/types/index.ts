@@ -38,26 +38,53 @@ export interface Animal {
 }
 
 export interface Endereco {
+  id?: string;
   rua: string;
   bairro: string;
   numero: string;
   cidade: string;
   estado: string;
   cep: string;
+  tipo?: 'residencial' | 'comercial' | 'outro';
+}
+
+export interface Contato {
+  id?: string;
+  tipo: 'telefone' | 'celular' | 'email' | 'whatsapp';
+  valor: string;
+  principal: boolean;
 }
 
 export interface Adotante {
   id: string;
   nome: string;
-  email: string;
-  telefone: string;
+  dataNascimento: Date;
+  rg: string;
   cpf: string;
-  endereco: Endereco;
+  contatos: Contato[];
+  profissao: string;
+  estadoCivil: 'solteiro' | 'casado' | 'divorciado' | 'viuvo' | 'uniao_estavel';
+  enderecos: Endereco[];
   termoCompromissoId?: string;
   animaisAdotados: Animal[];
   status: 'ativo' | 'inativo';
+  proximoContato?: Date;
+  diasParaContato?: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface AdotanteFilters {
+  nome?: string;
+  cpf?: string;
+  status?: 'ativo' | 'inativo';
+  cidade?: string;
+  estado?: string;
+  profissao?: string;
+  estadoCivil?: 'solteiro' | 'casado' | 'divorciado' | 'viuvo' | 'uniao_estavel';
+  dataInicio?: Date;
+  dataFim?: Date;
+  proximoContato?: Date;
 }
 
 export interface TermoCompromisso {
