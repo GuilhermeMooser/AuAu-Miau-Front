@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Trash2, User, Phone, MapPin, Calendar, Briefcase, Heart, Bell, BellOff, Link } from 'lucide-react';
+import { Plus, Trash2, User, Phone, MapPin, Calendar, Briefcase, Heart, Bell, BellOff, Link, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -57,16 +57,26 @@ interface AdotanteFormProps {
 
 const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCancel, mode }) => {
   // Mock data for animals and terms
-  const [availableAnimals] = useState<Animal[]>([
+  const [availableAnimais] = useState<Animal[]>([
     { id: '1', nome: 'Bella', tipo: 'cao', raca: 'Labrador', idade: 2, sexo: 'femea', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
     { id: '2', nome: 'Rex', tipo: 'cao', raca: 'Pastor Alemão', idade: 3, sexo: 'macho', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
     { id: '3', nome: 'Mimi', tipo: 'gato', raca: 'Persa', idade: 1, sexo: 'femea', status: 'disponivel', castrado: false, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
+    { id: '4', nome: 'Thor', tipo: 'cao', raca: 'Golden Retriever', idade: 4, sexo: 'macho', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
+    { id: '5', nome: 'Luna', tipo: 'gato', raca: 'Siamês', idade: 2, sexo: 'femea', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
   ]);
 
   const [availableTermos] = useState<TermoCompromisso[]>([
     { id: '1', nome: 'Termo Padrão Cães', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
     { id: '2', nome: 'Termo Padrão Gatos', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
+    { id: '3', nome: 'Termo Especial Filhotes', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
+    { id: '4', nome: 'Termo Idosos', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
   ]);
+
+  // Search states
+  const [animalSearch, setAnimalSearch] = useState('');
+  const [termoSearch, setTermoSearch] = useState('');
+  const [showAnimalResults, setShowAnimalResults] = useState(false);
+  const [showTermoResults, setShowTermoResults] = useState(false);
 
   const form = useForm<AdotanteFormData>({
     resolver: zodResolver(adotanteSchema),
@@ -132,6 +142,52 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
       uniao_estavel: 'União Estável'
     };
     return labels[estado as keyof typeof labels];
+  };
+
+  // Filter functions
+  const filteredAnimais = availableAnimais.filter(animal =>
+    animal.nome.toLowerCase().includes(animalSearch.toLowerCase()) ||
+    animal.raca.toLowerCase().includes(animalSearch.toLowerCase())
+  );
+
+  const filteredTermos = availableTermos.filter(termo =>
+    termo.nome.toLowerCase().includes(termoSearch.toLowerCase())
+  );
+
+  // Get linked items
+  const getLinkedAnimais = () => {
+    const linkedIds = form.watch('animaisVinculados') || [];
+    return availableAnimais.filter(animal => linkedIds.includes(animal.id));
+  };
+
+  const getLinkedTermo = () => {
+    const termoId = form.watch('termoCompromissoId');
+    return availableTermos.find(termo => termo.id === termoId);
+  };
+
+  // Link/Unlink functions
+  const linkAnimal = (animalId: string) => {
+    const currentValues = form.getValues('animaisVinculados') || [];
+    if (!currentValues.includes(animalId)) {
+      form.setValue('animaisVinculados', [...currentValues, animalId]);
+    }
+    setAnimalSearch('');
+    setShowAnimalResults(false);
+  };
+
+  const unlinkAnimal = (animalId: string) => {
+    const currentValues = form.getValues('animaisVinculados') || [];
+    form.setValue('animaisVinculados', currentValues.filter(id => id !== animalId));
+  };
+
+  const linkTermo = (termoId: string) => {
+    form.setValue('termoCompromissoId', termoId);
+    setTermoSearch('');
+    setShowTermoResults(false);
+  };
+
+  const unlinkTermo = () => {
+    form.setValue('termoCompromissoId', '');
   };
 
   return (
@@ -598,70 +654,215 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               Vincule animais ou termos de compromisso a este adotante
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="animaisVinculados"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Animais Vinculados</FormLabel>
-                    <div className="space-y-2">
-                      {availableAnimals.map((animal) => (
-                        <div key={animal.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            checked={field.value?.includes(animal.id) || false}
-                            onCheckedChange={(checked) => {
-                              const currentValues = field.value || [];
-                              if (checked) {
-                                field.onChange([...currentValues, animal.id]);
-                              } else {
-                                field.onChange(currentValues.filter(id => id !== animal.id));
-                              }
-                            }}
-                            disabled={isReadOnly}
-                          />
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">{animal.nome}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {animal.tipo === 'cao' ? '🐕' : '🐱'} {animal.raca} • {animal.idade} {animal.idade === 1 ? 'ano' : 'anos'}
+          <CardContent className="space-y-6">
+            {/* Animals Section */}
+            <div>
+              <Label className="text-base font-medium">Animais Vinculados</Label>
+              <p className="text-sm text-muted-foreground mb-4">
+                Pesquise e vincule animais a este adotante
+              </p>
+              
+              {/* Linked Animals */}
+              {getLinkedAnimais().length > 0 && (
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Animais Vinculados Atualmente:</Label>
+                  <div className="space-y-2">
+                    {getLinkedAnimais().map((animal) => (
+                      <div key={animal.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">
+                            {animal.tipo === 'cao' ? '🐕' : '🐱'}
+                          </div>
+                          <div>
+                            <div className="font-medium">{animal.nome}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {animal.raca} • {animal.idade} {animal.idade === 1 ? 'ano' : 'anos'}
                             </div>
                           </div>
-                          <Badge variant="outline" className="text-xs">
-                            {animal.status === 'disponivel' ? 'Disponível' : 
-                             animal.status === 'adotado' ? 'Adotado' : 'Em Processo'}
-                          </Badge>
                         </div>
-                      ))}
+                        {!isReadOnly && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => unlinkAnimal(animal.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Animal Search */}
+              {!isReadOnly && (
+                <div className="relative">
+                  <Label className="text-sm font-medium mb-2 block">Pesquisar e Adicionar Animal:</Label>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por nome ou raça do animal..."
+                      value={animalSearch}
+                      onChange={(e) => {
+                        setAnimalSearch(e.target.value);
+                        setShowAnimalResults(e.target.value.length > 0);
+                      }}
+                      className="pl-8"
+                      onFocus={() => setShowAnimalResults(animalSearch.length > 0)}
+                    />
+                  </div>
+                  
+                  {/* Animal Search Results */}
+                  {showAnimalResults && animalSearch && (
+                    <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {filteredAnimais.length > 0 ? (
+                        filteredAnimais.map((animal) => {
+                          const isLinked = getLinkedAnimais().some(linked => linked.id === animal.id);
+                          return (
+                            <div
+                              key={animal.id}
+                              className={`p-3 hover:bg-muted cursor-pointer border-b border-border last:border-b-0 ${
+                                isLinked ? 'opacity-50' : ''
+                              }`}
+                              onClick={() => !isLinked && linkAnimal(animal.id)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="text-lg">
+                                    {animal.tipo === 'cao' ? '🐕' : '🐱'}
+                                  </div>
+                                  <div>
+                                    <div className="font-medium">{animal.nome}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {animal.raca} • {animal.idade} {animal.idade === 1 ? 'ano' : 'anos'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {animal.status === 'disponivel' ? 'Disponível' : 
+                                     animal.status === 'adotado' ? 'Adotado' : 'Em Processo'}
+                                  </Badge>
+                                  {isLinked && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      Já Vinculado
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="p-3 text-sm text-muted-foreground text-center">
+                          Nenhum animal encontrado
+                        </div>
+                      )}
                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="termoCompromissoId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Termo de Compromisso</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um termo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {availableTermos.map((termo) => (
-                          <SelectItem key={termo.id} value={termo.id}>
-                            {termo.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  )}
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Terms Section */}
+            <div>
+              <Label className="text-base font-medium">Termo de Compromisso</Label>
+              <p className="text-sm text-muted-foreground mb-4">
+                Pesquise e vincule um termo de compromisso a este adotante
+              </p>
+              
+              {/* Linked Term */}
+              {getLinkedTermo() && (
+                <div className="mb-4">
+                  <Label className="text-sm font-medium mb-2 block">Termo Vinculado Atualmente:</Label>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl">📋</div>
+                      <div>
+                        <div className="font-medium">{getLinkedTermo()?.nome}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Termo de compromisso
+                        </div>
+                      </div>
+                    </div>
+                    {!isReadOnly && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={unlinkTermo}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Term Search */}
+              {!isReadOnly && (
+                <div className="relative">
+                  <Label className="text-sm font-medium mb-2 block">Pesquisar e Adicionar Termo:</Label>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por nome do termo..."
+                      value={termoSearch}
+                      onChange={(e) => {
+                        setTermoSearch(e.target.value);
+                        setShowTermoResults(e.target.value.length > 0);
+                      }}
+                      className="pl-8"
+                      onFocus={() => setShowTermoResults(termoSearch.length > 0)}
+                    />
+                  </div>
+                  
+                  {/* Term Search Results */}
+                  {showTermoResults && termoSearch && (
+                    <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {filteredTermos.length > 0 ? (
+                        filteredTermos.map((termo) => {
+                          const isLinked = getLinkedTermo()?.id === termo.id;
+                          return (
+                            <div
+                              key={termo.id}
+                              className={`p-3 hover:bg-muted cursor-pointer border-b border-border last:border-b-0 ${
+                                isLinked ? 'opacity-50' : ''
+                              }`}
+                              onClick={() => !isLinked && linkTermo(termo.id)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="text-lg">📋</div>
+                                  <div>
+                                    <div className="font-medium">{termo.nome}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      Termo de compromisso
+                                    </div>
+                                  </div>
+                                </div>
+                                {isLinked && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Já Vinculado
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="p-3 text-sm text-muted-foreground text-center">
+                          Nenhum termo encontrado
+                        </div>
+                      )}
+                    </div>
+                 )}
+               </div>
+             )}
             </div>
           </CardContent>
         </Card>
