@@ -4,65 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useAnimais } from './useAnimais';
 
-const Animais = () => {
-  // Mock data
-  const animais = [
-    {
-      id: 1,
-      nome: 'Bella',
-      tipo: 'cao',
-      raca: 'Labrador',
-      idade: 2,
-      sexo: 'femea',
-      status: 'disponivel',
-      fotos: [],
-      castrado: true,
-      vacinado: true,
-    },
-    {
-      id: 2,
-      nome: 'Rex',
-      tipo: 'cao',
-      raca: 'Pastor Alemão',
-      idade: 3,
-      sexo: 'macho',
-      status: 'em_processo',
-      fotos: [],
-      castrado: true,
-      vacinado: true,
-    },
-    {
-      id: 3,
-      nome: 'Mimi',
-      tipo: 'gato',
-      raca: 'Persa',
-      idade: 1,
-      sexo: 'femea',
-      status: 'adotado',
-      fotos: [],
-      castrado: false,
-      vacinado: true,
-    },
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'disponivel': return 'bg-success text-success-foreground';
-      case 'adotado': return 'bg-primary text-primary-foreground';
-      case 'em_processo': return 'bg-warning text-warning-foreground';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'disponivel': return 'Disponível';
-      case 'adotado': return 'Adotado';
-      case 'em_processo': return 'Em Processo';
-      default: return status;
-    }
-  };
+const AnimaisPage = () => {
+  const { animais, getStatusColor, getStatusText } = useAnimais();
 
   return (
     <div className="p-6 space-y-6">
@@ -172,4 +117,4 @@ const Animais = () => {
   );
 };
 
-export default Animais;
+export default AnimaisPage;

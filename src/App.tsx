@@ -14,8 +14,8 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 // Pages
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Animais from "./pages/Animais";
-import Adotantes from "./pages/Adotantes";
+import AnimaisPage from "./pages/animais/page";
+import AdotantesPage from "./pages/adotantes/page";
 import Termos from "./pages/Termos";
 import NotFound from "./pages/NotFound";
 
@@ -54,7 +54,7 @@ const App = () => (
             <Route path="/animais" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <Animais />
+                  <AnimaisPage />
                 </DashboardLayout>
               </ProtectedRoute>
             } />
@@ -62,7 +62,7 @@ const App = () => (
             <Route path="/adotantes" element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <Adotantes />
+                  <AdotantesPage />
                 </DashboardLayout>
               </ProtectedRoute>
             } />

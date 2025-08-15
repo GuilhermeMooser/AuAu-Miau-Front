@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Trash2, User, Phone, MapPin, Calendar, Briefcase, Heart } from 'lucide-react';
+import { Plus, Trash2, User, Phone, MapPin, Calendar, Briefcase, Heart, Bell, BellOff, Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Adotante, Contato, Endereco } from '@/types';
+import { MaskedInput } from '@/components/ui/masked-input';
+import { Adotante, Contato, Endereco, Animal, TermoCompromisso } from '@/types';
 
 const contatoSchema = z.object({
   tipo: z.enum(['telefone', 'celular', 'email', 'whatsapp']),
@@ -39,6 +41,9 @@ const adotanteSchema = z.object({
   estadoCivil: z.enum(['solteiro', 'casado', 'divorciado', 'viuvo', 'uniao_estavel']),
   enderecos: z.array(enderecoSchema).min(1, 'Pelo menos um endereço é obrigatório'),
   diasParaContato: z.number().min(1, 'Dias para contato deve ser maior que 0').optional(),
+  notificacoesAtivas: z.boolean(),
+  animaisVinculados: z.array(z.string()).optional(),
+  termoCompromissoId: z.string().optional(),
 });
 
 type AdotanteFormData = z.infer<typeof adotanteSchema>;
@@ -51,6 +56,18 @@ interface AdotanteFormProps {
 }
 
 const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCancel, mode }) => {
+  // Mock data for animals and terms
+  const [availableAnimals] = useState<Animal[]>([
+    { id: '1', nome: 'Bella', tipo: 'cao', raca: 'Labrador', idade: 2, sexo: 'femea', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
+    { id: '2', nome: 'Rex', tipo: 'cao', raca: 'Pastor Alemão', idade: 3, sexo: 'macho', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
+    { id: '3', nome: 'Mimi', tipo: 'gato', raca: 'Persa', idade: 1, sexo: 'femea', status: 'disponivel', castrado: false, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
+  ]);
+
+  const [availableTermos] = useState<TermoCompromisso[]>([
+    { id: '1', nome: 'Termo Padrão Cães', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
+    { id: '2', nome: 'Termo Padrão Gatos', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
+  ]);
+
   const form = useForm<AdotanteFormData>({
     resolver: zodResolver(adotanteSchema),
     defaultValues: {
@@ -63,6 +80,9 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
       estadoCivil: adotante?.estadoCivil || 'solteiro',
       enderecos: adotante?.enderecos || [{ rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '', tipo: 'residencial' as const }],
       diasParaContato: adotante?.diasParaContato || 30,
+      notificacoesAtivas: adotante?.notificacoesAtivas ?? true,
+      animaisVinculados: adotante?.animaisVinculados || [],
+      termoCompromissoId: adotante?.termoCompromissoId || '',
     },
   });
 
@@ -162,7 +182,12 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                   <FormItem>
                     <FormLabel>RG</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={isReadOnly} />
+                      <MaskedInput 
+                        mask="99.999.999-9" 
+                        {...field} 
+                        disabled={isReadOnly} 
+                        placeholder="00.000.000-0"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -175,7 +200,12 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                   <FormItem>
                     <FormLabel>CPF</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={isReadOnly} />
+                      <MaskedInput 
+                        mask="999.999.999-99" 
+                        {...field} 
+                        disabled={isReadOnly} 
+                        placeholder="000.000.000-00"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -196,6 +226,32 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                       />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="notificacoesAtivas"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isReadOnly}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="flex items-center gap-2">
+                        {field.value ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                        Ativar notificações de contato
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Quando ativo, você será notificado para entrar em contato conforme o prazo configurado
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -296,19 +352,38 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name={`contatos.${index}.valor`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Valor</FormLabel>
-                          <FormControl>
-                            <Input {...field} disabled={isReadOnly} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                     <FormField
+                       control={form.control}
+                       name={`contatos.${index}.valor`}
+                       render={({ field }) => {
+                         const contatoTipo = form.watch(`contatos.${index}.tipo`);
+                         const getMask = () => {
+                           if (contatoTipo === 'telefone' || contatoTipo === 'celular' || contatoTipo === 'whatsapp') {
+                             return '(99) 99999-9999';
+                           }
+                           return '';
+                         };
+                         
+                         return (
+                           <FormItem>
+                             <FormLabel>Valor</FormLabel>
+                             <FormControl>
+                               {getMask() ? (
+                                 <MaskedInput
+                                   mask={getMask()}
+                                   {...field}
+                                   disabled={isReadOnly}
+                                   placeholder={contatoTipo === 'email' ? 'email@exemplo.com' : '(00) 00000-0000'}
+                                 />
+                               ) : (
+                                 <Input {...field} disabled={isReadOnly} />
+                               )}
+                             </FormControl>
+                             <FormMessage />
+                           </FormItem>
+                         );
+                       }}
+                     />
                     <FormField
                       control={form.control}
                       name={`contatos.${index}.principal`}
@@ -475,19 +550,24 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={form.control}
-                        name={`enderecos.${index}.cep`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>CEP</FormLabel>
-                            <FormControl>
-                              <Input {...field} disabled={isReadOnly} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                       <FormField
+                         control={form.control}
+                         name={`enderecos.${index}.cep`}
+                         render={({ field }) => (
+                           <FormItem>
+                             <FormLabel>CEP</FormLabel>
+                             <FormControl>
+                               <MaskedInput
+                                 mask="99999-999"
+                                 {...field}
+                                 disabled={isReadOnly}
+                                 placeholder="00000-000"
+                               />
+                             </FormControl>
+                             <FormMessage />
+                           </FormItem>
+                         )}
+                       />
                     </div>
                   </div>
                 </CardContent>
@@ -504,6 +584,86 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                 Adicionar Endereço
               </Button>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Animal and Term Links */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Link className="h-5 w-5" />
+              Vínculos
+            </CardTitle>
+            <CardDescription>
+              Vincule animais ou termos de compromisso a este adotante
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="animaisVinculados"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Animais Vinculados</FormLabel>
+                    <div className="space-y-2">
+                      {availableAnimals.map((animal) => (
+                        <div key={animal.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={field.value?.includes(animal.id) || false}
+                            onCheckedChange={(checked) => {
+                              const currentValues = field.value || [];
+                              if (checked) {
+                                field.onChange([...currentValues, animal.id]);
+                              } else {
+                                field.onChange(currentValues.filter(id => id !== animal.id));
+                              }
+                            }}
+                            disabled={isReadOnly}
+                          />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium">{animal.nome}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {animal.tipo === 'cao' ? '🐕' : '🐱'} {animal.raca} • {animal.idade} {animal.idade === 1 ? 'ano' : 'anos'}
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {animal.status === 'disponivel' ? 'Disponível' : 
+                             animal.status === 'adotado' ? 'Adotado' : 'Em Processo'}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="termoCompromissoId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Termo de Compromisso</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um termo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Nenhum termo selecionado</SelectItem>
+                        {availableTermos.map((termo) => (
+                          <SelectItem key={termo.id} value={termo.id}>
+                            {termo.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </CardContent>
         </Card>
 
