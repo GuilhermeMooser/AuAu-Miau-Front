@@ -651,7 +651,6 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhum termo selecionado</SelectItem>
                         {availableTermos.map((termo) => (
                           <SelectItem key={termo.id} value={termo.id}>
                             {termo.nome}
