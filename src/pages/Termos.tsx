@@ -71,24 +71,25 @@ const Termos = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Termos de Compromisso</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Termos de Compromisso</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Gerencie todos os termos de compromisso de adoção
           </p>
         </div>
-        <Button className="shadow-glow">
+        <Button className="shadow-glow w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
-          Novo Termo
+          <span className="hidden sm:inline">Novo Termo</span>
+          <span className="sm:hidden">Novo</span>
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center space-x-4">
-        <div className="flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <div className="flex-1 max-w-full sm:max-w-md">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -97,14 +98,14 @@ const Termos = () => {
             />
           </div>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="w-full sm:w-auto">
           <Filter className="mr-2 h-4 w-4" />
           Filtros
         </Button>
       </div>
 
       {/* Terms Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {termos.map((termo) => (
           <Card key={termo.id} className="bg-gradient-card border-border shadow-soft hover:shadow-medium transition-all">
             <CardHeader>
@@ -172,7 +173,7 @@ const Termos = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex space-x-2 pt-2">
+                <div className="flex flex-col sm:flex-row gap-2 pt-2">
                   <Button variant="outline" size="sm" className="flex-1">
                     Editar
                   </Button>

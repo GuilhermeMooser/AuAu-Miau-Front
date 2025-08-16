@@ -28,16 +28,16 @@ const AppHeader: React.FC = () => {
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="flex items-center justify-between h-full px-4">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
           <SidebarTrigger className="hover:bg-muted" />
-          <div className="hidden md:block">
-            <h1 className="text-lg font-semibold text-foreground">
+          <div className="hidden sm:block">
+            <h1 className="text-base md:text-lg font-semibold text-foreground truncate">
               Sistema de Gerenciamento ONG
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-4 w-4" />

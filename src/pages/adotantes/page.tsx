@@ -41,24 +41,25 @@ const AdotantesPage = () => {
   } = useAdotantes();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Adotantes</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Adotantes</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Gerencie todos os adotantes cadastrados
           </p>
         </div>
-        <Button className="shadow-glow" onClick={() => setShowCreateModal(true)}>
+        <Button className="shadow-glow w-full sm:w-auto" onClick={() => setShowCreateModal(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Cadastrar Adotante
+          <span className="hidden sm:inline">Cadastrar Adotante</span>
+          <span className="sm:hidden">Cadastrar</span>
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center space-x-4">
-        <div className="flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <div className="flex-1 max-w-full sm:max-w-md">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -69,7 +70,7 @@ const AdotantesPage = () => {
             />
           </div>
         </div>
-        <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
+        <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowFilters(!showFilters)}>
           <Filter className="mr-2 h-4 w-4" />
           Filtros
           {Object.keys(filters).length > 0 && (
@@ -90,7 +91,7 @@ const AdotantesPage = () => {
       )}
 
       {/* Adopters Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {adotantes.map((adotante) => {
           const primaryContact = getPrimaryContact(adotante.contatos);
           const primaryAddress = getPrimaryAddress(adotante.enderecos);
@@ -202,14 +203,14 @@ const AdotantesPage = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex space-x-2 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
                     <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditClick(adotante)}>
-                      <Edit className="h-3 w-3 mr-1" />
-                      Editar
+                      <Edit className="h-3 w-3 sm:mr-1" />
+                      <span className="hidden sm:inline ml-1">Editar</span>
                     </Button>
                     <Button variant="secondary" size="sm" className="flex-1" onClick={() => handleViewAdotante(adotante)}>
-                      <Eye className="h-3 w-3 mr-1" />
-                      Ver Detalhes
+                      <Eye className="h-3 w-3 sm:mr-1" />
+                      <span className="hidden sm:inline ml-1">Ver Detalhes</span>
                     </Button>
                   </div>
                 </div>
@@ -236,7 +237,7 @@ const AdotantesPage = () => {
 
       {/* Create Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>Cadastrar Novo Adotante</DialogTitle>
           </DialogHeader>
@@ -250,7 +251,7 @@ const AdotantesPage = () => {
 
       {/* Edit Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>Editar Adotante</DialogTitle>
           </DialogHeader>
@@ -268,7 +269,7 @@ const AdotantesPage = () => {
 
       {/* View Modal */}
       <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>Detalhes do Adotante</DialogTitle>
           </DialogHeader>
