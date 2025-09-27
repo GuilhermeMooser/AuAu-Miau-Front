@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Trash2, User, Phone, MapPin, Calendar, Briefcase, Heart, Bell, BellOff, Link, Search, X } from 'lucide-react';
+import { format } from 'date-fns';
+import { Plus, Trash2, User, Phone, MapPin, Calendar, CalendarIcon, Briefcase, Heart, Bell, BellOff, Link, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +13,10 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { MaskedInput } from '@/components/ui/masked-input';
+import { cn } from '@/lib/utils';
 import { Adotante, Contato, Endereco, Animal, TermoCompromisso } from '@/types';
 
 const contatoSchema = z.object({
@@ -33,14 +37,19 @@ const enderecoSchema = z.object({
 
 const adotanteSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+  email: z.string().email('Email inválido').optional().or(z.literal('')),
   dataNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
   rg: z.string().min(1, 'RG é obrigatório'),
   cpf: z.string().min(11, 'CPF inválido'),
-  contatos: z.array(contatoSchema).min(1, 'Pelo menos um contato é obrigatório'),
+  contatos: z.array(contatoSchema).min(1, 'Pelo menos um contato é obrigatório')
+    .refine((contatos) => contatos.filter(c => c.principal).length <= 1, {
+      message: 'Apenas um contato pode ser principal',
+    }),
   profissao: z.string().min(1, 'Profissão é obrigatória'),
   estadoCivil: z.enum(['solteiro', 'casado', 'divorciado', 'viuvo', 'uniao_estavel']),
   enderecos: z.array(enderecoSchema).min(1, 'Pelo menos um endereço é obrigatório'),
   diasParaContato: z.number().min(1, 'Dias para contato deve ser maior que 0').optional(),
+  proximoContato: z.date().optional(),
   notificacoesAtivas: z.boolean(),
   animaisVinculados: z.array(z.string()).optional(),
   termoCompromissoId: z.string().optional(),
@@ -82,6 +91,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
     resolver: zodResolver(adotanteSchema),
     defaultValues: {
       nome: adotante?.nome || '',
+      email: '', // Will be populated from contacts if exists
       dataNascimento: adotante?.dataNascimento?.toISOString().split('T')[0] || '',
       rg: adotante?.rg || '',
       cpf: adotante?.cpf || '',
@@ -90,6 +100,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
       estadoCivil: adotante?.estadoCivil || 'solteiro',
       enderecos: adotante?.enderecos || [{ rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '', tipo: 'residencial' as const }],
       diasParaContato: adotante?.diasParaContato || 30,
+      proximoContato: adotante?.proximoContato,
       notificacoesAtivas: adotante?.notificacoesAtivas ?? true,
       animaisVinculados: adotante?.animaisVinculados || [],
       termoCompromissoId: adotante?.termoCompromissoId || '',
@@ -202,7 +213,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="nome"
@@ -211,6 +222,21 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                     <FormLabel>Nome Completo</FormLabel>
                     <FormControl>
                       <Input {...field} disabled={isReadOnly} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" {...field} disabled={isReadOnly} placeholder="email@exemplo.com" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -230,7 +256,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                 )}
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="rg"
@@ -267,24 +293,6 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="diasParaContato"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dias para próximo contato</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        disabled={isReadOnly} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
@@ -312,6 +320,72 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                 )}
               />
             </div>
+            
+            {/* Contact Configuration */}
+            {form.watch('notificacoesAtivas') && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                <FormField
+                  control={form.control}
+                  name="diasParaContato"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dias para próximo contato</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          {...field} 
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          disabled={isReadOnly || !form.watch('notificacoesAtivas')} 
+                          placeholder="30"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="proximoContato"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Data do próximo contato</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                              disabled={isReadOnly || !form.watch('notificacoesAtivas')}
+                            >
+                              {field.value ? (
+                                format(field.value, "dd/MM/yyyy")
+                              ) : (
+                                <span>Selecionar data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -440,31 +514,48 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                          );
                        }}
                      />
-                    <FormField
-                      control={form.control}
-                      name={`contatos.${index}.principal`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Principal</FormLabel>
-                          <FormControl>
-                            <Select 
-                              onValueChange={(value) => field.onChange(value === 'true')} 
-                              defaultValue={field.value ? 'true' : 'false'}
-                              disabled={isReadOnly}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="true">Sim</SelectItem>
-                                <SelectItem value="false">Não</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                     <FormField
+                       control={form.control}
+                       name={`contatos.${index}.principal`}
+                       render={({ field }) => {
+                         const principalCount = form.watch('contatos').filter(c => c.principal).length;
+                         const canSetPrincipal = !field.value || principalCount <= 1;
+                         
+                         return (
+                           <FormItem>
+                             <FormLabel>Principal</FormLabel>
+                             <FormControl>
+                               <Select 
+                                 onValueChange={(value) => {
+                                   const newValue = value === 'true';
+                                   if (newValue && principalCount > 0 && !field.value) {
+                                     // Remove principal from others
+                                     const currentContacts = form.getValues('contatos');
+                                     const updatedContacts = currentContacts.map((contact, idx) => 
+                                       idx === index ? { ...contact, principal: true } : { ...contact, principal: false }
+                                     );
+                                     form.setValue('contatos', updatedContacts);
+                                   } else {
+                                     field.onChange(newValue);
+                                   }
+                                 }} 
+                                 value={field.value ? 'true' : 'false'}
+                                 disabled={isReadOnly}
+                               >
+                                 <SelectTrigger>
+                                   <SelectValue />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                   <SelectItem value="true">Sim</SelectItem>
+                                   <SelectItem value="false">Não</SelectItem>
+                                 </SelectContent>
+                               </Select>
+                             </FormControl>
+                             <FormMessage />
+                           </FormItem>
+                         );
+                       }}
+                     />
                   </div>
                 </CardContent>
               </Card>
