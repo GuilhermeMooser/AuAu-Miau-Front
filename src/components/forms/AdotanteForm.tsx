@@ -17,7 +17,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { MaskedInput } from '@/components/ui/masked-input';
 import { cn } from '@/lib/utils';
-import { Adotante, Contato, Endereco, Animal, TermoCompromisso } from '@/types';
+import { Adotante, Contato, Endereco, Animal } from '@/types';
 
 const contatoSchema = z.object({
   tipo: z.enum(['telefone', 'celular', 'email', 'whatsapp']),
@@ -52,7 +52,6 @@ const adotanteSchema = z.object({
   proximoContato: z.date().optional(),
   notificacoesAtivas: z.boolean(),
   animaisVinculados: z.array(z.string()).optional(),
-  termoCompromissoId: z.string().optional(),
 });
 
 type AdotanteFormData = z.infer<typeof adotanteSchema>;
@@ -65,7 +64,7 @@ interface AdotanteFormProps {
 }
 
 const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCancel, mode }) => {
-  // Mock data for animals and terms
+  // Mock data for animals
   const [availableAnimais] = useState<Animal[]>([
     { id: '1', nome: 'Bella', tipo: 'cao', raca: 'Labrador', idade: 2, sexo: 'femea', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
     { id: '2', nome: 'Rex', tipo: 'cao', raca: 'Pastor Alemão', idade: 3, sexo: 'macho', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
@@ -74,18 +73,9 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
     { id: '5', nome: 'Luna', tipo: 'gato', raca: 'Siamês', idade: 2, sexo: 'femea', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
   ]);
 
-  const [availableTermos] = useState<TermoCompromisso[]>([
-    { id: '1', nome: 'Termo Padrão Cães', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
-    { id: '2', nome: 'Termo Padrão Gatos', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
-    { id: '3', nome: 'Termo Especial Filhotes', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
-    { id: '4', nome: 'Termo Idosos', rg: '', cpf: '', dataNascimento: new Date(), email: '', contatos: [], profissao: '', estadoCivil: '', endereco: { rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '' }, createdAt: new Date(), updatedAt: new Date() },
-  ]);
-
   // Search states
   const [animalSearch, setAnimalSearch] = useState('');
-  const [termoSearch, setTermoSearch] = useState('');
   const [showAnimalResults, setShowAnimalResults] = useState(false);
-  const [showTermoResults, setShowTermoResults] = useState(false);
 
   const form = useForm<AdotanteFormData>({
     resolver: zodResolver(adotanteSchema),
@@ -103,7 +93,6 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
       proximoContato: adotante?.proximoContato,
       notificacoesAtivas: adotante?.notificacoesAtivas ?? true,
       animaisVinculados: adotante?.animaisVinculados || [],
-      termoCompromissoId: adotante?.termoCompromissoId || '',
     },
   });
 
@@ -161,19 +150,10 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
     animal.raca.toLowerCase().includes(animalSearch.toLowerCase())
   );
 
-  const filteredTermos = availableTermos.filter(termo =>
-    termo.nome.toLowerCase().includes(termoSearch.toLowerCase())
-  );
-
   // Get linked items
   const getLinkedAnimais = () => {
     const linkedIds = form.watch('animaisVinculados') || [];
     return availableAnimais.filter(animal => linkedIds.includes(animal.id));
-  };
-
-  const getLinkedTermo = () => {
-    const termoId = form.watch('termoCompromissoId');
-    return availableTermos.find(termo => termo.id === termoId);
   };
 
   // Link/Unlink functions
@@ -189,16 +169,6 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   const unlinkAnimal = (animalId: string) => {
     const currentValues = form.getValues('animaisVinculados') || [];
     form.setValue('animaisVinculados', currentValues.filter(id => id !== animalId));
-  };
-
-  const linkTermo = (termoId: string) => {
-    form.setValue('termoCompromissoId', termoId);
-    setTermoSearch('');
-    setShowTermoResults(false);
-  };
-
-  const unlinkTermo = () => {
-    form.setValue('termoCompromissoId', '');
   };
 
   return (
@@ -739,10 +709,10 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Link className="h-5 w-5" />
-              Vínculos
+              Animais Vinculados
             </CardTitle>
             <CardDescription>
-              Vincule animais ou termos de compromisso a este adotante
+              Vincule animais a este adotante
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -855,105 +825,6 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                   )}
                 </div>
               )}
-            </div>
-
-            <Separator />
-
-            {/* Terms Section */}
-            <div>
-              <Label className="text-base font-medium">Termo de Compromisso</Label>
-              <p className="text-sm text-muted-foreground mb-4">
-                Pesquise e vincule um termo de compromisso a este adotante
-              </p>
-              
-              {/* Linked Term */}
-              {getLinkedTermo() && (
-                <div className="mb-4">
-                  <Label className="text-sm font-medium mb-2 block">Termo Vinculado Atualmente:</Label>
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="text-2xl">📋</div>
-                      <div>
-                        <div className="font-medium">{getLinkedTermo()?.nome}</div>
-                        <div className="text-sm text-muted-foreground">
-                          Termo de compromisso
-                        </div>
-                      </div>
-                    </div>
-                    {!isReadOnly && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={unlinkTermo}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Term Search */}
-              {!isReadOnly && (
-                <div className="relative">
-                  <Label className="text-sm font-medium mb-2 block">Pesquisar e Adicionar Termo:</Label>
-                  <div className="relative">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar por nome do termo..."
-                      value={termoSearch}
-                      onChange={(e) => {
-                        setTermoSearch(e.target.value);
-                        setShowTermoResults(e.target.value.length > 0);
-                      }}
-                      className="pl-8"
-                      onFocus={() => setShowTermoResults(termoSearch.length > 0)}
-                    />
-                  </div>
-                  
-                  {/* Term Search Results */}
-                  {showTermoResults && termoSearch && (
-                    <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                      {filteredTermos.length > 0 ? (
-                        filteredTermos.map((termo) => {
-                          const isLinked = getLinkedTermo()?.id === termo.id;
-                          return (
-                            <div
-                              key={termo.id}
-                              className={`p-3 hover:bg-muted cursor-pointer border-b border-border last:border-b-0 ${
-                                isLinked ? 'opacity-50' : ''
-                              }`}
-                              onClick={() => !isLinked && linkTermo(termo.id)}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="text-lg">📋</div>
-                                  <div>
-                                    <div className="font-medium">{termo.nome}</div>
-                                    <div className="text-sm text-muted-foreground">
-                                      Termo de compromisso
-                                    </div>
-                                  </div>
-                                </div>
-                                {isLinked && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Já Vinculado
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div className="p-3 text-sm text-muted-foreground text-center">
-                          Nenhum termo encontrado
-                        </div>
-                      )}
-                    </div>
-                 )}
-               </div>
-             )}
             </div>
           </CardContent>
         </Card>
