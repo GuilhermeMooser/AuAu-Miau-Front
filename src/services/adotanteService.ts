@@ -1,20 +1,61 @@
 import { api } from './api';
 import { Adotante, AdotanteFilters } from '@/types/adotante';
 
+// Backend response structure
+interface BackendAdotanteProps {
+  id: string;
+  activeNotification: boolean;
+  addresses: any[] | null;
+  civilState: string;
+  contacts: any[] | null;
+  cpf: string;
+  dtOfBirth: string;
+  email: string;
+  name: string;
+  profession: string;
+  rg: string;
+  animals: any[] | null;
+  audit: {
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+  };
+  createdByUserId: string;
+  deletedByUserId: string | null;
+  dtToNotify: string | null;
+  terms: any[] | null;
+  updatedByUserId: string | null;
+}
+
+interface BackendAdotanteResponse {
+  props: BackendAdotanteProps;
+}
+
+interface BackendListResponse {
+  items: BackendAdotanteResponse[];
+  meta: {
+    totalItems: number;
+    itemCount: number;
+    itemsPerPage: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
 export interface CreateAdotanteRequest {
-  nome: string;
+  name: string;
   email?: string;
-  dataNascimento: string;
+  dtOfBirth: string;
   rg: string;
   cpf: string;
-  contatos: Array<{
+  contacts: Array<{
     tipo: 'telefone' | 'celular' | 'email' | 'whatsapp';
     valor: string;
     principal: boolean;
-  }>;
-  profissao: string;
-  estadoCivil: 'solteiro' | 'casado' | 'divorciado' | 'viuvo' | 'uniao_estavel';
-  enderecos: Array<{
+  }> | null;
+  profession: string;
+  civilState: 'solteiro' | 'casado' | 'divorciado' | 'viuvo' | 'uniao_estavel';
+  addresses: Array<{
     rua: string;
     bairro: string;
     numero: string;
@@ -22,26 +63,71 @@ export interface CreateAdotanteRequest {
     estado: string;
     cep: string;
     tipo: 'residencial' | 'comercial' | 'outro';
-  }>;
-  proximoContato?: Date;
-  notificacoesAtivas: boolean;
-  animaisVinculados?: string[];
+  }> | null;
+  dtToNotify?: string | null;
+  activeNotification: boolean;
+  animals?: string[] | null;
 }
 
-export interface UpdateAdotanteRequest extends Partial<CreateAdotanteRequest> {
-  id: string;
-}
+export interface UpdateAdotanteRequest extends Partial<CreateAdotanteRequest> {}
 
 export interface AdotanteListResponse {
   data: Adotante[];
   total: number;
   page: number;
   limit: number;
+  totalPages: number;
 }
+
+// Helper function to map backend data to frontend Adotante type
+const mapBackendToFrontend = (backendData: BackendAdotanteProps): Adotante => {
+  return {
+    id: backendData.id,
+    nome: backendData.name,
+    dataNascimento: new Date(backendData.dtOfBirth),
+    rg: backendData.rg,
+    cpf: backendData.cpf,
+    contatos: backendData.contacts || [],
+    profissao: backendData.profession,
+    estadoCivil: backendData.civilState as any,
+    enderecos: backendData.addresses || [],
+    status: 'ativo',
+    animaisAdotados: backendData.animals || [],
+    animaisVinculados: backendData.animals?.map((a: any) => a.id) || [],
+    proximoContato: backendData.dtToNotify ? new Date(backendData.dtToNotify) : undefined,
+    notificacoesAtivas: backendData.activeNotification,
+    createdAt: new Date(backendData.audit.createdAt),
+    updatedAt: new Date(backendData.audit.updatedAt),
+  };
+};
+
+// Helper function to map frontend data to backend format
+const mapFrontendToBackend = (frontendData: any): CreateAdotanteRequest => {
+  return {
+    name: frontendData.nome || frontendData.name,
+    email: frontendData.email || '',
+    dtOfBirth: typeof frontendData.dataNascimento === 'string' 
+      ? frontendData.dataNascimento 
+      : frontendData.dtOfBirth,
+    rg: frontendData.rg,
+    cpf: frontendData.cpf,
+    contacts: frontendData.contatos || frontendData.contacts || null,
+    profession: frontendData.profissao || frontendData.profession,
+    civilState: frontendData.estadoCivil || frontendData.civilState,
+    addresses: frontendData.enderecos || frontendData.addresses || null,
+    dtToNotify: frontendData.proximoContato 
+      ? (typeof frontendData.proximoContato === 'string' 
+          ? frontendData.proximoContato 
+          : frontendData.proximoContato.toISOString())
+      : null,
+    activeNotification: frontendData.notificacoesAtivas ?? frontendData.activeNotification ?? false,
+    animals: frontendData.animaisVinculados || frontendData.animals || null,
+  };
+};
 
 export const adotanteService = {
   // Listar adotantes com filtros e paginação
-  list: async (filters?: AdotanteFilters, page = 1, limit = 10): Promise<AdotanteListResponse> => {
+  list: async (filters?: AdotanteFilters, page = 1, limit = 100): Promise<AdotanteListResponse> => {
     const params = new URLSearchParams();
     
     if (filters) {
@@ -55,47 +141,47 @@ export const adotanteService = {
     params.append('page', String(page));
     params.append('limit', String(limit));
     
-    const response = await api.get(`/adotantes?${params.toString()}`);
-    return response.data;
+    const response = await api.get<BackendListResponse>(`/api/adopter/v1?${params.toString()}`);
+    
+    const mappedData = response.data.items.map(item => mapBackendToFrontend(item.props));
+    
+    return {
+      data: mappedData,
+      total: response.data.meta.totalItems,
+      page: response.data.meta.currentPage,
+      limit: response.data.meta.itemsPerPage,
+      totalPages: response.data.meta.totalPages,
+    };
   },
 
   // Buscar adotante por ID
   getById: async (id: string): Promise<Adotante> => {
-    const response = await api.get(`/adotantes/${id}`);
-    return response.data;
+    const response = await api.get<BackendAdotanteResponse>(`/api/adopter/v1/${id}`);
+    return mapBackendToFrontend(response.data.props);
   },
 
   // Criar novo adotante
-  create: async (data: CreateAdotanteRequest): Promise<Adotante> => {
-    const response = await api.post('/adotantes', data);
-    return response.data;
+  create: async (data: any): Promise<Adotante> => {
+    const backendData = mapFrontendToBackend(data);
+    const response = await api.post<BackendAdotanteResponse>('/api/adopter/v1', backendData);
+    return mapBackendToFrontend(response.data.props);
   },
 
   // Atualizar adotante
-  update: async (data: UpdateAdotanteRequest): Promise<Adotante> => {
-    const { id, ...updateData } = data;
-    const response = await api.put(`/adotantes/${id}`, updateData);
-    return response.data;
+  update: async (id: string, data: any): Promise<Adotante> => {
+    const backendData = mapFrontendToBackend(data);
+    const response = await api.put<BackendAdotanteResponse>(`/api/adopter/v1/${id}`, backendData);
+    return mapBackendToFrontend(response.data.props);
   },
 
   // Deletar adotante
   delete: async (id: string): Promise<void> => {
-    await api.delete(`/adotantes/${id}`);
+    await api.delete(`/api/adopter/v1/${id}`);
   },
 
   // Buscar adotantes por nome ou CPF
   search: async (query: string): Promise<Adotante[]> => {
-    const response = await api.get(`/adotantes/search?q=${encodeURIComponent(query)}`);
-    return response.data;
-  },
-
-  // Vincular animal ao adotante
-  linkAnimal: async (adotanteId: string, animalId: string): Promise<void> => {
-    await api.post(`/adotantes/${adotanteId}/animals/${animalId}`);
-  },
-
-  // Desvincular animal do adotante
-  unlinkAnimal: async (adotanteId: string, animalId: string): Promise<void> => {
-    await api.delete(`/adotantes/${adotanteId}/animals/${animalId}`);
+    const response = await api.get<BackendListResponse>(`/api/adopter/v1?search=${encodeURIComponent(query)}`);
+    return response.data.items.map(item => mapBackendToFrontend(item.props));
   },
 };

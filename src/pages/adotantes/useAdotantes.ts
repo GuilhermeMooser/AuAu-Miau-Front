@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Adotante, AdotanteFilters } from '@/types';
+import { adotanteService } from '@/services/adotanteService';
+import { toast } from '@/hooks/use-toast';
 
 export const useAdotantes = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -9,106 +11,33 @@ export const useAdotantes = () => {
   const [selectedAdotante, setSelectedAdotante] = useState<Adotante | undefined>();
   const [filters, setFilters] = useState<AdotanteFilters>({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [adotantes, setAdotantes] = useState<Adotante[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Mock data with updated structure
-  const adotantes: Adotante[] = [
-    {
-      id: '1',
-      nome: 'Maria Silva',
-      dataNascimento: new Date('1985-03-15'),
-      rg: '12.345.678-9',
-      cpf: '123.456.789-00',
-      contatos: [
-        { tipo: 'celular', valor: '(11) 99999-9999', principal: true },
-        { tipo: 'email', valor: 'maria.silva@email.com', principal: false }
-      ],
-      profissao: 'Veterinária',
-      estadoCivil: 'casado',
-      enderecos: [
-        {
-          rua: 'Rua das Flores, 123',
-          bairro: 'Jardim Paulista',
-          numero: '123',
-          cidade: 'São Paulo',
-          estado: 'SP',
-          cep: '01234-567',
-          tipo: 'residencial'
-        }
-      ],
-      status: 'ativo',
-      animaisAdotados: [],
-      animaisVinculados: [],
-      proximoContato: new Date('2024-03-15'),
-      diasParaContato: 30,
-      notificacoesAtivas: true,
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15'),
-    },
-    {
-      id: '2',
-      nome: 'João Santos',
-      dataNascimento: new Date('1990-07-22'),
-      rg: '98.765.432-1',
-      cpf: '987.654.321-00',
-      contatos: [
-        { tipo: 'celular', valor: '(11) 88888-8888', principal: true },
-        { tipo: 'email', valor: 'joao.santos@email.com', principal: false }
-      ],
-      profissao: 'Engenheiro',
-      estadoCivil: 'solteiro',
-      enderecos: [
-        {
-          rua: 'Av. Paulista, 1000',
-          bairro: 'Bela Vista',
-          numero: '1000',
-          cidade: 'São Paulo',
-          estado: 'SP',
-          cep: '01310-100',
-          tipo: 'residencial'
-        }
-      ],
-      status: 'ativo',
-      animaisAdotados: [],
-      animaisVinculados: [],
-      proximoContato: new Date('2024-03-20'),
-      diasParaContato: 15,
-      notificacoesAtivas: false,
-      createdAt: new Date('2024-01-10'),
-      updatedAt: new Date('2024-01-10'),
-    },
-    {
-      id: '3',
-      nome: 'Ana Costa',
-      dataNascimento: new Date('1988-12-05'),
-      rg: '45.678.912-3',
-      cpf: '456.789.123-00',
-      contatos: [
-        { tipo: 'telefone', valor: '(11) 77777-7777', principal: true },
-        { tipo: 'email', valor: 'ana.costa@email.com', principal: false }
-      ],
-      profissao: 'Professora',
-      estadoCivil: 'divorciado',
-      enderecos: [
-        {
-          rua: 'Rua da Consolação, 500',
-          bairro: 'Consolação',
-          numero: '500',
-          cidade: 'São Paulo',
-          estado: 'SP',
-          cep: '01302-000',
-          tipo: 'residencial'
-        }
-      ],
-      status: 'inativo',
-      animaisAdotados: [],
-      animaisVinculados: [],
-      proximoContato: new Date('2024-03-25'),
-      diasParaContato: 7,
-      notificacoesAtivas: true,
-      createdAt: new Date('2024-01-05'),
-      updatedAt: new Date('2024-01-05'),
-    },
-  ];
+  // Fetch adotantes from backend
+  const fetchAdotantes = async () => {
+    try {
+      setLoading(true);
+      const response = await adotanteService.list(filters, page, 100);
+      setAdotantes(response.data);
+      setTotalPages(response.totalPages);
+    } catch (error) {
+      console.error('Error fetching adotantes:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os adotantes',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdotantes();
+  }, [filters, page]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -139,15 +68,72 @@ export const useAdotantes = () => {
     return diff;
   };
 
-  const handleCreateAdotante = (data: any) => {
-    console.log('Creating adotante:', data);
-    setShowCreateModal(false);
+  const handleCreateAdotante = async (data: any) => {
+    try {
+      setLoading(true);
+      await adotanteService.create(data);
+      toast({
+        title: 'Sucesso',
+        description: 'Adotante criado com sucesso',
+      });
+      setShowCreateModal(false);
+      await fetchAdotantes();
+    } catch (error) {
+      console.error('Error creating adotante:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível criar o adotante',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEditAdotante = (data: any) => {
-    console.log('Editing adotante:', data);
-    setShowEditModal(false);
-    setSelectedAdotante(undefined);
+  const handleEditAdotante = async (data: any) => {
+    if (!selectedAdotante) return;
+    
+    try {
+      setLoading(true);
+      await adotanteService.update(selectedAdotante.id, data);
+      toast({
+        title: 'Sucesso',
+        description: 'Adotante atualizado com sucesso',
+      });
+      setShowEditModal(false);
+      setSelectedAdotante(undefined);
+      await fetchAdotantes();
+    } catch (error) {
+      console.error('Error updating adotante:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o adotante',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAdotante = async (id: string) => {
+    try {
+      setLoading(true);
+      await adotanteService.delete(id);
+      toast({
+        title: 'Sucesso',
+        description: 'Adotante excluído com sucesso',
+      });
+      await fetchAdotantes();
+    } catch (error) {
+      console.error('Error deleting adotante:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir o adotante',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleViewAdotante = (adotante: Adotante) => {
@@ -184,8 +170,13 @@ export const useAdotantes = () => {
     searchTerm,
     setSearchTerm,
     adotantes,
+    loading,
+    page,
+    setPage,
+    totalPages,
     handleCreateAdotante,
     handleEditAdotante,
+    handleDeleteAdotante,
     handleViewAdotante,
     handleEditClick,
     handleApplyFilters,
@@ -195,5 +186,6 @@ export const useAdotantes = () => {
     getPrimaryAddress,
     isContactDue,
     getDaysUntilContact,
+    fetchAdotantes,
   };
 };
