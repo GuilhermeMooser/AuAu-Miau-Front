@@ -40,7 +40,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (credentials: LoginRequest) => {
     try {
       setIsLoading(true);
+      console.log('Tentando login com:', { username: credentials.username });
       const response: AuthResponse = await authService.login(credentials);
+      console.log('Resposta do login:', response);
       
       localStorage.setItem('authToken', response.token);
       setUser(response.user);
@@ -50,6 +52,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: `Bem-vindo(a), ${response.user.username}`,
       });
     } catch (error: any) {
+      console.error('Erro no login:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        url: error.config?.url
+      });
       const errorMessage = error.response?.data?.message || 'Erro ao fazer login';
       toast({
         title: "Erro no login",
