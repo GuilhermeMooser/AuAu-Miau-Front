@@ -42,60 +42,48 @@ const App = () => (
             {/* Redirect root to dashboard */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             
-            {/* Protected Routes */}
+            {/* Routes - Authentication disabled for development */}
             <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Dashboard />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <DashboardLayout>
+                <Dashboard />
+              </DashboardLayout>
             } />
             
             <Route path="/animais" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <AnimaisPage />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <DashboardLayout>
+                <AnimaisPage />
+              </DashboardLayout>
             } />
             
             <Route path="/adotantes" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <AdotantesPage />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <DashboardLayout>
+                <AdotantesPage />
+              </DashboardLayout>
             } />
             
             <Route path="/termos" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <Termos />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <DashboardLayout>
+                <Termos />
+              </DashboardLayout>
             } />
             
-            {/* Admin-only routes */}
+            {/* Admin routes */}
             <Route path="/contabilidade" element={
-              <ProtectedRoute requiredRole="admin">
-                <DashboardLayout>
-                  <div className="p-6">
-                    <h1 className="text-3xl font-bold text-foreground">Contabilidade</h1>
-                    <p className="text-muted-foreground">Módulo em desenvolvimento...</p>
-                  </div>
-                </DashboardLayout>
-              </ProtectedRoute>
+              <DashboardLayout>
+                <div className="p-6">
+                  <h1 className="text-3xl font-bold text-foreground">Contabilidade</h1>
+                  <p className="text-muted-foreground">Módulo em desenvolvimento...</p>
+                </div>
+              </DashboardLayout>
             } />
             
             <Route path="/usuarios" element={
-              <ProtectedRoute requiredRole="admin">
-                <DashboardLayout>
-                  <div className="p-6">
-                    <h1 className="text-3xl font-bold text-foreground">Usuários</h1>
-                    <p className="text-muted-foreground">Módulo em desenvolvimento...</p>
-                  </div>
-                </DashboardLayout>
-              </ProtectedRoute>
+              <DashboardLayout>
+                <div className="p-6">
+                  <h1 className="text-3xl font-bold text-foreground">Usuários</h1>
+                  <p className="text-muted-foreground">Módulo em desenvolvimento...</p>
+                </div>
+              </DashboardLayout>
             } />
             
             {/* Catch-all */}
