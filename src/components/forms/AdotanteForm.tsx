@@ -296,25 +296,6 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                 <FormField
                   control={form.control}
-                  name="diasParaContato"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dias para próximo contato</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field} 
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                          disabled={isReadOnly || !form.watch('notificacoesAtivas')} 
-                          placeholder="30"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="proximoContato"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
@@ -575,28 +556,6 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                     )}
                   </div>
                   <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name={`enderecos.${index}.tipo`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Endereço</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="residencial">Residencial</SelectItem>
-                              <SelectItem value="comercial">Comercial</SelectItem>
-                              <SelectItem value="outro">Outro</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="md:col-span-3">
                         <FormField
