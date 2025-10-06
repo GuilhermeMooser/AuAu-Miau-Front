@@ -49,24 +49,24 @@ export interface CreateAdotanteRequest {
   rg: string;
   cpf: string;
   contacts: Array<{
-    tipo: 'telefone' | 'celular' | 'email' | 'whatsapp';
-    valor: string;
-    principal: boolean;
+    type: 'telefone' | 'celular' | 'email' | 'whatsapp';
+    value: string;
+    isPrincipal: boolean;
   }> | null;
   profession: string;
   civilState: 'solteiro' | 'casado' | 'divorciado' | 'viuvo' | 'uniao_estavel';
   addresses: Array<{
-    rua: string;
-    bairro: string;
-    numero: string;
-    cidade: string;
-    estado: string;
-    cep: string;
-    tipo: 'residencial' | 'comercial' | 'outro';
+    street: string;
+    neighborhood: string;
+    number: string;
+    city: {
+      id: string;
+    };
+    zipCode: string;
   }> | null;
   dtToNotify?: string | null;
   activeNotification: boolean;
-  animals?: string[] | null;
+  animalsIds?: string[];
 }
 
 export interface UpdateAdotanteRequest extends Partial<CreateAdotanteRequest> {}
@@ -103,7 +103,29 @@ const mapBackendToFrontend = (backendData: BackendAdotanteProps): Adotante => {
 
 // Helper function to map frontend data to backend format
 const mapFrontendToBackend = (frontendData: any): CreateAdotanteRequest => {
-  return {
+  // Map contacts to English format
+  const contacts = (frontendData.contatos || frontendData.contacts || []).map((contact: any) => ({
+    type: contact.tipo || contact.type,
+    value: contact.valor || contact.value,
+    isPrincipal: contact.principal ?? contact.isPrincipal,
+  }));
+
+  // Map addresses to English format
+  const addresses = (frontendData.enderecos || frontendData.addresses || []).map((address: any) => ({
+    street: address.rua || address.street,
+    neighborhood: address.bairro || address.neighborhood,
+    number: address.numero || address.number,
+    city: {
+      id: address.cidadeId || address.city?.id || address.cidade,
+    },
+    zipCode: address.cep || address.zipCode,
+  }));
+
+  // Map animals IDs - only include if there are selected animals
+  const animalsIds = frontendData.animaisVinculados || frontendData.animalsIds;
+  const hasAnimals = animalsIds && animalsIds.length > 0;
+
+  const payload: any = {
     name: frontendData.nome || frontendData.name,
     email: frontendData.email || '',
     dtOfBirth: typeof frontendData.dataNascimento === 'string' 
@@ -111,18 +133,24 @@ const mapFrontendToBackend = (frontendData: any): CreateAdotanteRequest => {
       : frontendData.dtOfBirth,
     rg: frontendData.rg,
     cpf: frontendData.cpf,
-    contacts: frontendData.contatos || frontendData.contacts || null,
+    contacts: contacts.length > 0 ? contacts : null,
     profession: frontendData.profissao || frontendData.profession,
     civilState: frontendData.estadoCivil || frontendData.civilState,
-    addresses: frontendData.enderecos || frontendData.addresses || null,
+    addresses: addresses.length > 0 ? addresses : null,
     dtToNotify: frontendData.proximoContato 
       ? (typeof frontendData.proximoContato === 'string' 
           ? frontendData.proximoContato 
           : frontendData.proximoContato.toISOString())
       : null,
     activeNotification: frontendData.notificacoesAtivas ?? frontendData.activeNotification ?? false,
-    animals: frontendData.animaisVinculados || frontendData.animals || null,
   };
+
+  // Only include animalsIds if there are animals selected
+  if (hasAnimals) {
+    payload.animalsIds = animalsIds;
+  }
+
+  return payload;
 };
 
 export const adotanteService = {

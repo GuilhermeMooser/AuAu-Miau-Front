@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { MaskedInput } from '@/components/ui/masked-input';
 import { cn } from '@/lib/utils';
 import { Adotante, Contato, Endereco, Animal } from '@/types';
+import { locationService, City, UF } from '@/services/locationService';
 
 const contatoSchema = z.object({
   tipo: z.enum(['telefone', 'celular', 'email', 'whatsapp']),
@@ -29,10 +30,9 @@ const enderecoSchema = z.object({
   rua: z.string().min(1, 'Rua é obrigatória'),
   bairro: z.string().min(1, 'Bairro é obrigatório'),
   numero: z.string().min(1, 'Número é obrigatório'),
-  cidade: z.string().min(1, 'Cidade é obrigatória'),
-  estado: z.string().min(2, 'Estado é obrigatório'),
+  cidadeId: z.string().min(1, 'Cidade é obrigatória'),
+  estadoId: z.string().min(1, 'Estado é obrigatório'),
   cep: z.string().min(8, 'CEP inválido'),
-  tipo: z.enum(['residencial', 'comercial', 'outro']),
 });
 
 const adotanteSchema = z.object({
@@ -73,9 +73,34 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
     { id: '5', nome: 'Luna', tipo: 'gato', raca: 'Siamês', idade: 2, sexo: 'femea', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
   ]);
 
+  // Location states
+  const [ufs, setUfs] = useState<UF[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
+
   // Search states
   const [animalSearch, setAnimalSearch] = useState('');
   const [showAnimalResults, setShowAnimalResults] = useState(false);
+
+  // Load UFs and Cities on mount
+  useEffect(() => {
+    const loadLocations = async () => {
+      setLoadingLocations(true);
+      try {
+        const [ufsData, citiesData] = await Promise.all([
+          locationService.getUFs(),
+          locationService.getCities(),
+        ]);
+        setUfs(ufsData);
+        setCities(citiesData);
+      } catch (error) {
+        console.error('Erro ao carregar localizações:', error);
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
+    loadLocations();
+  }, []);
 
   const form = useForm<AdotanteFormData>({
     resolver: zodResolver(adotanteSchema),
@@ -88,7 +113,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
       contatos: adotante?.contatos || [{ tipo: 'celular' as const, valor: '', principal: true }],
       profissao: adotante?.profissao || '',
       estadoCivil: adotante?.estadoCivil || 'solteiro',
-      enderecos: adotante?.enderecos || [{ rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '', tipo: 'residencial' as const }],
+      enderecos: adotante?.enderecos || [{ rua: '', bairro: '', numero: '', cidadeId: '', estadoId: '', cep: '' }],
       diasParaContato: adotante?.diasParaContato || 30,
       proximoContato: adotante?.proximoContato,
       notificacoesAtivas: adotante?.notificacoesAtivas ?? true,
@@ -602,26 +627,72 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                       />
                       <FormField
                         control={form.control}
-                        name={`enderecos.${index}.cidade`}
+                        name={`enderecos.${index}.estadoId`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Cidade</FormLabel>
-                            <FormControl>
-                              <Input {...field} disabled={isReadOnly} />
-                            </FormControl>
+                            <FormLabel>Estado</FormLabel>
+                            <Select 
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Clear city when state changes
+                                form.setValue(`enderecos.${index}.cidadeId`, '');
+                              }} 
+                              value={field.value} 
+                              disabled={isReadOnly || loadingLocations}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {ufs.map((uf) => (
+                                  <SelectItem key={uf.id} value={uf.id}>
+                                    {uf.abbreviation} - {uf.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                       <FormField
                         control={form.control}
-                        name={`enderecos.${index}.estado`}
+                        name={`enderecos.${index}.cidadeId`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Estado</FormLabel>
-                            <FormControl>
-                              <Input {...field} maxLength={2} disabled={isReadOnly} />
-                            </FormControl>
+                            <FormLabel>Cidade</FormLabel>
+                            <Select 
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Auto-select state when city is selected
+                                const selectedCity = cities.find(c => c.id === value);
+                                if (selectedCity && !form.getValues(`enderecos.${index}.estadoId`)) {
+                                  form.setValue(`enderecos.${index}.estadoId`, selectedCity.ufId);
+                                }
+                              }} 
+                              value={field.value} 
+                              disabled={isReadOnly || loadingLocations}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {cities
+                                  .filter(city => {
+                                    const selectedEstado = form.watch(`enderecos.${index}.estadoId`);
+                                    return !selectedEstado || city.ufId === selectedEstado;
+                                  })
+                                  .map((city) => (
+                                    <SelectItem key={city.id} value={city.id}>
+                                      {city.name}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -653,7 +724,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendEndereco({ rua: '', bairro: '', numero: '', cidade: '', estado: '', cep: '', tipo: 'residencial' as const })}
+                onClick={() => appendEndereco({ rua: '', bairro: '', numero: '', cidadeId: '', estadoId: '', cep: '' })}
                 className="w-full"
               >
                 <Plus className="mr-2 h-4 w-4" />
