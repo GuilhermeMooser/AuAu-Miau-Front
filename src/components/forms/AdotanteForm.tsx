@@ -77,22 +77,36 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   const [ufs, setUfs] = useState<UF[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
+  const [selectedUfId, setSelectedUfId] = useState<string>('');
+  const [prUfId, setPrUfId] = useState<string>('');
 
   // Search states
   const [animalSearch, setAnimalSearch] = useState('');
   const [showAnimalResults, setShowAnimalResults] = useState(false);
 
-  // Load UFs and Cities on mount
+  // Load UFs and Cities on mount - PR as default
   useEffect(() => {
     const loadLocations = async () => {
       setLoadingLocations(true);
       try {
-        const [ufsData, citiesData] = await Promise.all([
-          locationService.getUFs(),
-          locationService.getCities(),
-        ]);
+        const ufsData = await locationService.getUFs();
         setUfs(ufsData);
-        setCities(citiesData);
+        
+        // Encontrar o Paraná e definir como default
+        const parana = ufsData.find(uf => uf.abbreviation === 'PR');
+        if (parana) {
+          setPrUfId(parana.id);
+          setSelectedUfId(parana.id);
+          
+          // Buscar cidades do Paraná
+          const citiesData = await locationService.getCitiesByUF(parana.id);
+          setCities(citiesData);
+          
+          // Definir PR como default no primeiro endereço se estiver criando
+          if (!adotante && form.getValues('enderecos.0.estadoId') === '') {
+            form.setValue('enderecos.0.estadoId', parana.id);
+          }
+        }
       } catch (error) {
         console.error('Erro ao carregar localizações:', error);
       } finally {
@@ -101,6 +115,20 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
     };
     loadLocations();
   }, []);
+
+  // Helper function to load cities by UF
+  const loadCitiesByUF = async (ufId: string) => {
+    if (!ufId) return;
+    try {
+      setLoadingLocations(true);
+      const citiesData = await locationService.getCitiesByUF(ufId);
+      setCities(citiesData);
+    } catch (error) {
+      console.error('Erro ao carregar cidades:', error);
+    } finally {
+      setLoadingLocations(false);
+    }
+  };
 
   const form = useForm<AdotanteFormData>({
     resolver: zodResolver(adotanteSchema),
@@ -636,6 +664,8 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                                 field.onChange(value);
                                 // Clear city when state changes
                                 form.setValue(`enderecos.${index}.cidadeId`, '');
+                                // Load cities for the selected state
+                                loadCitiesByUF(value);
                               }} 
                               value={field.value} 
                               disabled={isReadOnly || loadingLocations}
@@ -724,7 +754,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendEndereco({ rua: '', bairro: '', numero: '', cidadeId: '', estadoId: '', cep: '' })}
+                onClick={() => appendEndereco({ rua: '', bairro: '', numero: '', cidadeId: '', estadoId: prUfId, cep: '' })}
                 className="w-full"
               >
                 <Plus className="mr-2 h-4 w-4" />

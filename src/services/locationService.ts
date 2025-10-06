@@ -19,12 +19,9 @@ export const locationService = {
     return response.data;
   },
 
-  // Buscar todas as cidades (ou filtrar por estado se necessário)
-  getCities: async (ufId?: string): Promise<City[]> => {
-    const url = ufId 
-      ? `/api/city/v1?ufId=${ufId}` 
-      : '/api/city/v1';
-    const response = await api.get<City[]>(url);
+  // Buscar cidades filtradas por estado
+  getCitiesByUF: async (ufId: string): Promise<City[]> => {
+    const response = await api.get<City[]>(`/api/city/v1/uf/${ufId}`);
     return response.data;
   },
 };
