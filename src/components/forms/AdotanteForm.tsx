@@ -173,6 +173,8 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   const isReadOnly = mode === 'view';
 
   const handleSubmit = (data: AdotanteFormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form validation errors:', form.formState.errors);
     if (!isReadOnly) {
       onSubmit(data);
     }
@@ -237,7 +239,9 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+        console.log('Form validation failed:', errors);
+      })} className="space-y-6">
         {/* Basic Info */}
         <Card>
           <CardHeader>
