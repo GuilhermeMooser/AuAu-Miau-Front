@@ -36,11 +36,11 @@ const enderecoSchema = z.object({
   city: z.object({
     id: z.number(),
     name: z.string(),
-    uf: z.object({
+    stateUf: z.object({
       id: z.number(),
       name: z.string(),
       acronym: z.string(),
-      country: z.string(),
+      country: z.union([z.string(), z.number()]).transform(val => String(val)),
     }),
     ibge: z.number(),
   }),
@@ -162,7 +162,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
         city: {
           id: 0,
           name: '',
-          uf: {
+          stateUf: {
             id: prUfId || 0,
             name: 'Paraná',
             acronym: 'PR',
@@ -733,7 +733,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                                 const selectedCity = cities.find(c => c.id === Number(value));
                                 if (selectedCity) {
                                   if (!form.getValues(`enderecos.${index}.estadoId`)) {
-                                    form.setValue(`enderecos.${index}.estadoId`, selectedCity.uf.id);
+                                    form.setValue(`enderecos.${index}.estadoId`, selectedCity.stateUf.id);
                                   }
                                   // Store the full city object for backend mapping
                                   form.setValue(`enderecos.${index}.city`, selectedCity);
@@ -797,7 +797,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                   city: {
                     id: 0,
                     name: '',
-                    uf: {
+                    stateUf: {
                       id: prUfId || 0,
                       name: 'Paraná',
                       acronym: 'PR',

@@ -82,7 +82,7 @@ export interface AdotanteListResponse {
 // Helper function to map backend data to frontend Adotante type
 const mapBackendToFrontend = (backendData: BackendAdotanteProps): Adotante => {
   return {
-    id: backendData.id,
+    id: backendData?.id,
     nome: backendData.name,
     dataNascimento: new Date(backendData.dtOfBirth),
     rg: backendData.rg,

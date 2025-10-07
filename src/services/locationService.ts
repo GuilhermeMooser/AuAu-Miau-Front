@@ -3,7 +3,7 @@ import { api } from "./api";
 export interface City {
   id: number;
   name: string;
-  uf: UF;
+  stateUf: UF;
   ibge: number;
 }
 
