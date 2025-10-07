@@ -1,26 +1,26 @@
-import { api } from './api';
+import { api } from "./api";
 
 export interface City {
-  id: string;
+  id: number;
   name: string;
-  ufId: string;
+  uf: UF;
 }
 
 export interface UF {
-  id: string;
+  id: number;
   name: string;
-  abbreviation: string;
+  acronym: string;
 }
 
 export const locationService = {
   // Buscar todos os estados
   getUFs: async (): Promise<UF[]> => {
-    const response = await api.get<UF[]>('/api/uf/v1');
+    const response = await api.get<UF[]>("/api/uf/v1");
     return response.data;
   },
 
   // Buscar cidades filtradas por estado
-  getCitiesByUF: async (ufId: string): Promise<City[]> => {
+  getCitiesByUF: async (ufId: number): Promise<City[]> => {
     const response = await api.get<City[]>(`/api/city/v1/uf/${ufId}`);
     return response.data;
   },
