@@ -712,11 +712,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                               </FormControl>
                               <SelectContent>
                                 {cities
-                                  .filter(city => {
-                                    const selectedEstado = form.watch(`enderecos.${index}.estadoId`);
-                                    return !selectedEstado || city.uf.id === selectedEstado;
-                                  })
-                                  .map((city) => (
+                                  ?.map((city) => (
                                     <SelectItem key={city.id} value={city.id.toString()}>
                                       {city.name}
                                     </SelectItem>
