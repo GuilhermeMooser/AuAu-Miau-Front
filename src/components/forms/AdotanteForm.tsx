@@ -33,6 +33,17 @@ const enderecoSchema = z.object({
   cidadeId: z.number().min(1, 'Cidade é obrigatória'),
   estadoId: z.number().min(1, 'Estado é obrigatório'),
   cep: z.string().min(8, 'CEP inválido'),
+  city: z.object({
+    id: z.number(),
+    name: z.string(),
+    uf: z.object({
+      id: z.number(),
+      name: z.string(),
+      acronym: z.string(),
+      country: z.string(),
+    }),
+    ibge: z.number(),
+  }).optional(),
 });
 
 const adotanteSchema = z.object({
@@ -696,12 +707,16 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                             <Select 
                               onValueChange={(value) => {
                                 field.onChange(Number(value));
-                                // Auto-select state when city is selected
+                                // Auto-select state when city is selected and store full city object
                                 const selectedCity = cities.find(c => c.id === Number(value));
-                                if (selectedCity && !form.getValues(`enderecos.${index}.estadoId`)) {
-                                  form.setValue(`enderecos.${index}.estadoId`, selectedCity.uf.id);
+                                if (selectedCity) {
+                                  if (!form.getValues(`enderecos.${index}.estadoId`)) {
+                                    form.setValue(`enderecos.${index}.estadoId`, selectedCity.uf.id);
+                                  }
+                                  // Store the full city object for backend mapping
+                                  form.setValue(`enderecos.${index}.city`, selectedCity);
                                 }
-                              }} 
+                              }}
                               value={field.value?.toString()} 
                               disabled={isReadOnly || loadingLocations}
                             >

@@ -4,12 +4,14 @@ export interface City {
   id: number;
   name: string;
   uf: UF;
+  ibge: number;
 }
 
 export interface UF {
   id: number;
   name: string;
   acronym: string;
+  country: string;
 }
 
 export const locationService = {
