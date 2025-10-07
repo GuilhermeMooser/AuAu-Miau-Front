@@ -111,15 +111,27 @@ const mapFrontendToBackend = (frontendData: any): CreateAdotanteRequest => {
   }));
 
   // Map addresses to English format
-  const addresses = (frontendData.enderecos || frontendData.addresses || []).map((address: any) => ({
-    street: address.rua || address.street,
-    neighborhood: address.bairro || address.neighborhood,
-    number: address.numero || address.number,
-    city: {
-      id: address.cidadeId || address.city?.id || address.cidade,
-    },
-    zipCode: address.cep || address.zipCode,
-  }));
+  const addresses = (frontendData.enderecos || frontendData.addresses || []).map((address: any) => {
+    // Get the city object from the form data
+    const cityObj = address.city;
+    
+    return {
+      street: address.rua || address.street,
+      neighborhood: address.bairro || address.neighborhood,
+      number: parseInt(address.numero || address.number, 10),
+      city: {
+        id: cityObj?.id || address.cidadeId || address.city?.id,
+        name: cityObj?.name || '',
+        stateUf: {
+          id: cityObj?.uf?.id || address.estadoId || 0,
+          name: cityObj?.uf?.name || '',
+          acronym: cityObj?.uf?.acronym || '',
+          country: cityObj?.uf?.country || 'Brasil',
+        },
+        ibge: cityObj?.ibge || 0,
+      },
+    };
+  });
 
   // Map animals IDs - only include if there are selected animals
   const animalsIds = frontendData.animaisVinculados || frontendData.animalsIds;
