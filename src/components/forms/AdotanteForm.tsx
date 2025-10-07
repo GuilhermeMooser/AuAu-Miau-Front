@@ -43,7 +43,7 @@ const enderecoSchema = z.object({
       country: z.string(),
     }),
     ibge: z.number(),
-  }).optional(),
+  }),
 });
 
 const adotanteSchema = z.object({
@@ -152,7 +152,25 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
       contatos: adotante?.contatos || [{ tipo: 'celular' as const, valor: '', principal: true }],
       profissao: adotante?.profissao || '',
       estadoCivil: adotante?.estadoCivil || 'solteiro',
-      enderecos: adotante?.enderecos || [{ rua: '', bairro: '', numero: '', cidadeId: 0, estadoId: 0, cep: '' }],
+      enderecos: adotante?.enderecos || [{ 
+        rua: '', 
+        bairro: '', 
+        numero: '', 
+        cidadeId: 0, 
+        estadoId: prUfId || 0, 
+        cep: '',
+        city: {
+          id: 0,
+          name: '',
+          uf: {
+            id: prUfId || 0,
+            name: 'Paraná',
+            acronym: 'PR',
+            country: 'Brasil',
+          },
+          ibge: 0,
+        }
+      }],
       diasParaContato: adotante?.diasParaContato || 30,
       proximoContato: adotante?.proximoContato,
       notificacoesAtivas: adotante?.notificacoesAtivas ?? true,
@@ -769,7 +787,25 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendEndereco({ rua: '', bairro: '', numero: '', cidadeId: 0, estadoId: prUfId || 0, cep: '' })}
+                onClick={() => appendEndereco({ 
+                  rua: '', 
+                  bairro: '', 
+                  numero: '', 
+                  cidadeId: 0, 
+                  estadoId: prUfId || 0, 
+                  cep: '',
+                  city: {
+                    id: 0,
+                    name: '',
+                    uf: {
+                      id: prUfId || 0,
+                      name: 'Paraná',
+                      acronym: 'PR',
+                      country: 'Brasil',
+                    },
+                    ibge: 0,
+                  }
+                })}
                 className="w-full"
               >
                 <Plus className="mr-2 h-4 w-4" />
