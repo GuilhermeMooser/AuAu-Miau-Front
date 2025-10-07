@@ -30,8 +30,8 @@ const enderecoSchema = z.object({
   rua: z.string().min(1, 'Rua é obrigatória'),
   bairro: z.string().min(1, 'Bairro é obrigatório'),
   numero: z.string().min(1, 'Número é obrigatório'),
-  cidadeId: z.string().min(1, 'Cidade é obrigatória'),
-  estadoId: z.string().min(1, 'Estado é obrigatório'),
+  cidadeId: z.number().min(1, 'Cidade é obrigatória'),
+  estadoId: z.number().min(1, 'Estado é obrigatório'),
   cep: z.string().min(8, 'CEP inválido'),
 });
 
@@ -77,8 +77,8 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   const [ufs, setUfs] = useState<UF[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
-  const [selectedUfId, setSelectedUfId] = useState<string>('');
-  const [prUfId, setPrUfId] = useState<string>('');
+  const [selectedUfId, setSelectedUfId] = useState<number | null>(null);
+  const [prUfId, setPrUfId] = useState<number | null>(null);
 
   // Search states
   const [animalSearch, setAnimalSearch] = useState('');
@@ -93,7 +93,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
         setUfs(ufsData);
         
         // Encontrar o Paraná e definir como default
-        const parana = ufsData.find(uf => uf.abbreviation === 'PR');
+        const parana = ufsData.find(uf => uf.acronym === 'PR');
         if (parana) {
           setPrUfId(parana.id);
           setSelectedUfId(parana.id);
@@ -103,7 +103,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
           setCities(citiesData);
           
           // Definir PR como default no primeiro endereço se estiver criando
-          if (!adotante && form.getValues('enderecos.0.estadoId') === '') {
+          if (!adotante) {
             form.setValue('enderecos.0.estadoId', parana.id);
           }
         }
@@ -117,7 +117,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   }, []);
 
   // Helper function to load cities by UF
-  const loadCitiesByUF = async (ufId: string) => {
+  const loadCitiesByUF = async (ufId: number) => {
     if (!ufId) return;
     try {
       setLoadingLocations(true);
@@ -141,7 +141,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
       contatos: adotante?.contatos || [{ tipo: 'celular' as const, valor: '', principal: true }],
       profissao: adotante?.profissao || '',
       estadoCivil: adotante?.estadoCivil || 'solteiro',
-      enderecos: adotante?.enderecos || [{ rua: '', bairro: '', numero: '', cidadeId: '', estadoId: '', cep: '' }],
+      enderecos: adotante?.enderecos || [{ rua: '', bairro: '', numero: '', cidadeId: 0, estadoId: 0, cep: '' }],
       diasParaContato: adotante?.diasParaContato || 30,
       proximoContato: adotante?.proximoContato,
       notificacoesAtivas: adotante?.notificacoesAtivas ?? true,
@@ -661,13 +661,13 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                             <FormLabel>Estado</FormLabel>
                             <Select 
                               onValueChange={(value) => {
-                                field.onChange(value);
+                                field.onChange(Number(value));
                                 // Clear city when state changes
-                                form.setValue(`enderecos.${index}.cidadeId`, '');
+                                form.setValue(`enderecos.${index}.cidadeId`, 0);
                                 // Load cities for the selected state
-                                loadCitiesByUF(value);
+                                loadCitiesByUF(Number(value));
                               }} 
-                              value={field.value} 
+                              value={field.value?.toString()} 
                               disabled={isReadOnly || loadingLocations}
                             >
                               <FormControl>
@@ -677,8 +677,8 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                               </FormControl>
                               <SelectContent>
                                 {ufs.map((uf) => (
-                                  <SelectItem key={uf.id} value={uf.id}>
-                                    {uf.abbreviation} - {uf.name}
+                                  <SelectItem key={uf.id} value={uf.id.toString()}>
+                                    {uf.acronym} - {uf.name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -695,14 +695,14 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                             <FormLabel>Cidade</FormLabel>
                             <Select 
                               onValueChange={(value) => {
-                                field.onChange(value);
+                                field.onChange(Number(value));
                                 // Auto-select state when city is selected
-                                const selectedCity = cities.find(c => c.id === value);
+                                const selectedCity = cities.find(c => c.id === Number(value));
                                 if (selectedCity && !form.getValues(`enderecos.${index}.estadoId`)) {
-                                  form.setValue(`enderecos.${index}.estadoId`, selectedCity.ufId);
+                                  form.setValue(`enderecos.${index}.estadoId`, selectedCity.uf.id);
                                 }
                               }} 
-                              value={field.value} 
+                              value={field.value?.toString()} 
                               disabled={isReadOnly || loadingLocations}
                             >
                               <FormControl>
@@ -714,10 +714,10 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                                 {cities
                                   .filter(city => {
                                     const selectedEstado = form.watch(`enderecos.${index}.estadoId`);
-                                    return !selectedEstado || city.ufId === selectedEstado;
+                                    return !selectedEstado || city.uf.id === selectedEstado;
                                   })
                                   .map((city) => (
-                                    <SelectItem key={city.id} value={city.id}>
+                                    <SelectItem key={city.id} value={city.id.toString()}>
                                       {city.name}
                                     </SelectItem>
                                   ))}
@@ -754,7 +754,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendEndereco({ rua: '', bairro: '', numero: '', cidadeId: '', estadoId: prUfId, cep: '' })}
+                onClick={() => appendEndereco({ rua: '', bairro: '', numero: '', cidadeId: 0, estadoId: prUfId || 0, cep: '' })}
                 className="w-full"
               >
                 <Plus className="mr-2 h-4 w-4" />
