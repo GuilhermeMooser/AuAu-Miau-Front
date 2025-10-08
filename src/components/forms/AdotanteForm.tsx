@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { Plus, Trash2, User, Phone, MapPin, Calendar, CalendarIcon, Briefcase, Heart, Bell, BellOff, Link, Search, X } from 'lucide-react';
+import { Plus, Trash2, User, Phone, MapPin, Calendar, CalendarIcon, Briefcase, Heart, Bell, BellOff, Link, Search, X, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -191,16 +191,18 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
 
   const isReadOnly = mode === 'view';
 
-  const handleSubmit = (data: AdotanteFormData) => {
-    if (!isReadOnly) {
-      onSubmit(data);
-      toast({
-        title: "Sucesso!",
-        description: mode === 'create' ? "Adotante cadastrado com sucesso." : "Adotante atualizado com sucesso.",
-        variant: "default",
-      });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (data: AdotanteFormData) => {
+    if (isReadOnly) return;
+    try {
+      setSubmitting(true);
+      await Promise.resolve(onSubmit(data));
+    } finally {
+      setSubmitting(false);
     }
   };
+
 
   const getContatoTypeLabel = (tipo: string) => {
     const labels = {
@@ -261,7 +263,15 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+          const firstKey = Object.keys(errors)[0] as keyof typeof errors | undefined;
+          const firstMsg = firstKey ? (errors as any)[firstKey]?.message : undefined;
+          toast({
+            title: 'Verifique os campos',
+            description: firstMsg || 'Preencha os campos obrigatórios corretamente.',
+            variant: 'destructive',
+          });
+        })} className="space-y-6">
         {/* Basic Info */}
         <Card>
           <CardHeader>
@@ -948,8 +958,17 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
             {isReadOnly ? 'Fechar' : 'Cancelar'}
           </Button>
           {!isReadOnly && (
-            <Button type="submit">
-              {mode === 'edit' ? 'Atualizar' : 'Cadastrar'}
+            <Button type="submit" disabled={submitting}>
+              {submitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {mode === 'edit' ? 'Atualizando...' : 'Cadastrando...'}
+                </>
+              ) : (
+                <>
+                  {mode === 'edit' ? 'Atualizar' : 'Cadastrar'}
+                </>
+              )}
             </Button>
           )}
         </div>
