@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { Plus, Trash2, User, Phone, MapPin, Calendar, CalendarIcon, Briefcase, Heart, Bell, BellOff, Link, Search, X } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,7 +41,7 @@ const enderecoSchema = z.object({
       id: z.number(),
       name: z.string(),
       acronym: z.string(),
-      country: z.union([z.string(), z.number()]).transform(val => String(val)),
+      country: z.string(),
     }),
     ibge: z.number(),
   }),
@@ -191,10 +192,13 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   const isReadOnly = mode === 'view';
 
   const handleSubmit = (data: AdotanteFormData) => {
-    console.log('Form submitted with data:', data);
-    console.log('Form validation errors:', form.formState.errors);
     if (!isReadOnly) {
       onSubmit(data);
+      toast({
+        title: "Sucesso!",
+        description: mode === 'create' ? "Adotante cadastrado com sucesso." : "Adotante atualizado com sucesso.",
+        variant: "default",
+      });
     }
   };
 
@@ -257,9 +261,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
-        console.log('Form validation failed:', errors);
-      })} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* Basic Info */}
         <Card>
           <CardHeader>
