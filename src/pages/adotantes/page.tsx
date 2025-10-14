@@ -66,13 +66,7 @@ const AdotantesPage = () => {
               placeholder="Buscar por nome, email, CPF..."
               className="pl-8 bg-background"
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                if (e.target.value) {
-                  setShowFilters(false);
-                  handleClearFilters();
-                }
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>

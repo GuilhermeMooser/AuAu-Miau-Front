@@ -13,8 +13,6 @@ import { AdotanteFilters } from '@/types';
 import { locationService, UF, City } from '@/services/locationService';
 
 const filtersSchema = z.object({
-  nome: z.string().optional(),
-  cpf: z.string().optional(),
   status: z.enum(['ativo', 'inativo']).optional(),
   cidade: z.string().optional(),
   estado: z.string().optional(),
@@ -42,8 +40,6 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
   const form = useForm<FiltersFormData>({
     resolver: zodResolver(filtersSchema),
     defaultValues: {
-      nome: activeFilters.nome || '',
-      cpf: activeFilters.cpf || '',
       status: activeFilters.status,
       cidade: activeFilters.cidade || '',
       estado: activeFilters.estado || '',
@@ -109,8 +105,6 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
 
   const handleClear = () => {
     form.reset({
-      nome: '',
-      cpf: '',
       status: undefined,
       cidade: '',
       estado: '',
@@ -167,31 +161,7 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {/* Basic Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Buscar por nome..." />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="cpf"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CPF</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="000.000.000-00" />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="status"

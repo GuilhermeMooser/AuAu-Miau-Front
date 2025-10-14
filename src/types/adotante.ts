@@ -40,8 +40,6 @@ export interface Adotante {
 }
 
 export interface AdotanteFilters {
-  nome?: string;
-  cpf?: string;
   status?: 'ativo' | 'inativo';
   cidade?: string;
   estado?: string;
