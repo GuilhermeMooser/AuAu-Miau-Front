@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { AdotanteFilters } from '@/types';
+import { locationService, UF, City } from '@/services/locationService';
 
 const filtersSchema = z.object({
   nome: z.string().optional(),
@@ -17,10 +18,7 @@ const filtersSchema = z.object({
   status: z.enum(['ativo', 'inativo']).optional(),
   cidade: z.string().optional(),
   estado: z.string().optional(),
-  profissao: z.string().optional(),
-  estadoCivil: z.enum(['solteiro', 'casado', 'divorciado', 'viuvo', 'uniao_estavel']).optional(),
   dataInicio: z.string().optional(),
-  dataFim: z.string().optional(),
   proximoContato: z.string().optional(),
 });
 
@@ -37,6 +35,10 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
   onClearFilters,
   activeFilters,
 }) => {
+  const [ufs, setUfs] = useState<UF[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
+
   const form = useForm<FiltersFormData>({
     resolver: zodResolver(filtersSchema),
     defaultValues: {
@@ -45,19 +47,52 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
       status: activeFilters.status,
       cidade: activeFilters.cidade || '',
       estado: activeFilters.estado || '',
-      profissao: activeFilters.profissao || '',
-      estadoCivil: activeFilters.estadoCivil,
       dataInicio: activeFilters.dataInicio?.toISOString().split('T')[0] || '',
-      dataFim: activeFilters.dataFim?.toISOString().split('T')[0] || '',
       proximoContato: activeFilters.proximoContato?.toISOString().split('T')[0] || '',
     },
   });
+
+  const selectedEstado = form.watch('estado');
+
+  useEffect(() => {
+    const loadUFs = async () => {
+      try {
+        const data = await locationService.getUFs();
+        setUfs(data);
+      } catch (error) {
+        console.error('Error loading UFs:', error);
+      }
+    };
+    loadUFs();
+  }, []);
+
+  useEffect(() => {
+    const loadCities = async () => {
+      if (!selectedEstado) {
+        setCities([]);
+        form.setValue('cidade', '');
+        return;
+      }
+
+      setLoadingCities(true);
+      try {
+        const ufId = parseInt(selectedEstado);
+        const data = await locationService.getCitiesByUF(ufId);
+        setCities(data);
+      } catch (error) {
+        console.error('Error loading cities:', error);
+        setCities([]);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+    loadCities();
+  }, [selectedEstado, form]);
 
   const handleSubmit = (data: FiltersFormData) => {
     const filters: AdotanteFilters = {
       ...data,
       dataInicio: data.dataInicio ? new Date(data.dataInicio) : undefined,
-      dataFim: data.dataFim ? new Date(data.dataFim) : undefined,
       proximoContato: data.proximoContato ? new Date(data.proximoContato) : undefined,
     };
     
@@ -79,12 +114,10 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
       status: undefined,
       cidade: '',
       estado: '',
-      profissao: '',
-      estadoCivil: undefined,
       dataInicio: '',
-      dataFim: '',
       proximoContato: '',
     });
+    setCities([]);
     onClearFilters();
   };
 
@@ -98,14 +131,17 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
         ativo: 'Ativo',
         inativo: 'Inativo',
       },
-      estadoCivil: {
-        solteiro: 'Solteiro(a)',
-        casado: 'Casado(a)',
-        divorciado: 'Divorciado(a)',
-        viuvo: 'Viúvo(a)',
-        uniao_estavel: 'União Estável',
-      },
     };
+
+    if (key === 'estado') {
+      const uf = ufs.find(u => u.id.toString() === value);
+      return uf ? uf.acronym : value;
+    }
+
+    if (key === 'cidade') {
+      const city = cities.find(c => c.id.toString() === value);
+      return city ? city.name : value;
+    }
 
     if (labels[key] && labels[key][value]) {
       return labels[key][value];
@@ -182,62 +218,55 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="cidade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cidade</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Cidade..." />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="estado"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Estado</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="UF" maxLength={2} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Professional and Civil Status */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="profissao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profissão</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Profissão..." />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="estadoCivil"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado Civil</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Todos os estados civis" />
+                          <SelectValue placeholder="Selecione o estado" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="solteiro">Solteiro(a)</SelectItem>
-                        <SelectItem value="casado">Casado(a)</SelectItem>
-                        <SelectItem value="divorciado">Divorciado(a)</SelectItem>
-                        <SelectItem value="viuvo">Viúvo(a)</SelectItem>
-                        <SelectItem value="uniao_estavel">União Estável</SelectItem>
+                        {ufs.map((uf) => (
+                          <SelectItem key={uf.id} value={uf.id.toString()}>
+                            {uf.acronym} - {uf.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cidade</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                      disabled={!selectedEstado || loadingCities}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={
+                            !selectedEstado 
+                              ? "Selecione um estado primeiro" 
+                              : loadingCities 
+                              ? "Carregando..." 
+                              : "Selecione a cidade"
+                          } />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {cities.map((city) => (
+                          <SelectItem key={city.id} value={city.id.toString()}>
+                            {city.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -246,25 +275,13 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
             </div>
 
             {/* Date Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="dataInicio"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Data de Cadastro (Início)</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dataFim"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data de Cadastro (Fim)</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
