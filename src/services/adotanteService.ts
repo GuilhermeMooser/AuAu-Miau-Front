@@ -203,8 +203,8 @@ export const adotanteService = {
   // Criar novo adotante
   create: async (data: any): Promise<Adotante> => {
     const backendData = mapFrontendToBackend(data);
-    const response = await api.post<BackendAdotanteResponse>('/api/adopter/v1', backendData);
-    return mapBackendToFrontend(response.data.props);
+    const response = await api.post<BackendAdotanteProps>('/api/adopter/v1', backendData);
+    return mapBackendToFrontend(response.data);
   },
 
   // Atualizar adotante

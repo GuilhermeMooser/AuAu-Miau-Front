@@ -41,7 +41,7 @@ const enderecoSchema = z.object({
       id: z.number(),
       name: z.string(),
       acronym: z.string(),
-      country: z.string(),
+      country: z.number(),
     }),
     ibge: z.number(),
   }),
@@ -167,7 +167,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
             id: prUfId || 0,
             name: 'Paraná',
             acronym: 'PR',
-            country: 'Brasil',
+            country: 1,
           },
           ibge: 0,
         }
@@ -194,6 +194,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (data: AdotanteFormData) => {
+    console.log(data)
     if (isReadOnly) return;
     try {
       setSubmitting(true);
@@ -813,7 +814,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                       id: prUfId || 0,
                       name: 'Paraná',
                       acronym: 'PR',
-                      country: 'Brasil',
+                      country: 1,
                     },
                     ibge: 0,
                   }
