@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { format } from 'date-fns';
 import { Plus, Trash2, User, Phone, MapPin, Calendar, CalendarIcon, Briefcase, Heart, Bell, BellOff, Link, Search, X, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -18,75 +17,22 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { MaskedInput } from '@/components/ui/masked-input';
 import { cn } from '@/lib/utils';
-import { Adotante, Contato, Endereco, Animal } from '@/types';
-import { locationService, City, UF } from '@/services/locationService';
+import { locationService, City, Uf  } from '@/services/locationService';
+import { Adopter, AdotanteFormData } from '@/types';
+import { adopterSchema } from './schemas';
 
-const contatoSchema = z.object({
-  tipo: z.enum(['telefone', 'celular', 'email', 'whatsapp']),
-  valor: z.string().min(1, 'Contato é obrigatório'),
-  principal: z.boolean(),
-});
 
-const enderecoSchema = z.object({
-  rua: z.string().min(1, 'Rua é obrigatória'),
-  bairro: z.string().min(1, 'Bairro é obrigatório'),
-  numero: z.string().min(1, 'Número é obrigatório'),
-  cidadeId: z.number().min(1, 'Cidade é obrigatória'),
-  estadoId: z.number().min(1, 'Estado é obrigatório'),
-  cep: z.string().min(8, 'CEP inválido'),
-  city: z.object({
-    id: z.number(),
-    name: z.string(),
-    stateUf: z.object({
-      id: z.number(),
-      name: z.string(),
-      acronym: z.string(),
-      country: z.string(),
-    }),
-    ibge: z.number(),
-  }),
-});
-
-const adotanteSchema = z.object({
-  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
-  dataNascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
-  rg: z.string().min(1, 'RG é obrigatório'),
-  cpf: z.string().min(11, 'CPF inválido'),
-  contatos: z.array(contatoSchema).min(1, 'Pelo menos um contato é obrigatório')
-    .refine((contatos) => contatos.filter(c => c.principal).length <= 1, {
-      message: 'Apenas um contato pode ser principal',
-    }),
-  profissao: z.string().min(1, 'Profissão é obrigatória'),
-  estadoCivil: z.enum(['solteiro', 'casado', 'divorciado', 'viuvo', 'uniao_estavel']),
-  enderecos: z.array(enderecoSchema).min(1, 'Pelo menos um endereço é obrigatório'),
-  diasParaContato: z.number().min(1, 'Dias para contato deve ser maior que 0').optional(),
-  proximoContato: z.date().optional(),
-  notificacoesAtivas: z.boolean(),
-  animaisVinculados: z.array(z.string()).optional(),
-});
-
-type AdotanteFormData = z.infer<typeof adotanteSchema>;
-
-interface AdotanteFormProps {
-  adotante?: Adotante;
+type AdopterFormProps = {
+  adopter?: Adopter;
   onSubmit: (data: AdotanteFormData) => void;
   onCancel: () => void;
   mode: 'create' | 'edit' | 'view';
 }
 
-const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCancel, mode }) => {
-  // Mock data for animals
-  const [availableAnimais] = useState<Animal[]>([
-    { id: '1', nome: 'Bella', tipo: 'cao', raca: 'Labrador', idade: 2, sexo: 'femea', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
-    { id: '2', nome: 'Rex', tipo: 'cao', raca: 'Pastor Alemão', idade: 3, sexo: 'macho', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
-    { id: '3', nome: 'Mimi', tipo: 'gato', raca: 'Persa', idade: 1, sexo: 'femea', status: 'disponivel', castrado: false, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
-    { id: '4', nome: 'Thor', tipo: 'cao', raca: 'Golden Retriever', idade: 4, sexo: 'macho', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
-    { id: '5', nome: 'Luna', tipo: 'gato', raca: 'Siamês', idade: 2, sexo: 'femea', status: 'disponivel', castrado: true, vacinado: true, vermifugado: true, fotos: [], observacoes: '', createdAt: new Date(), updatedAt: new Date() },
-  ]);
+const AdopterForm: React.FC<AdopterFormProps> = ({ adopter, onSubmit, onCancel, mode }) => {
 
   // Location states
-  const [ufs, setUfs] = useState<UF[]>([]);
+  const [ufs, setUfs] = useState<Uf[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
   const [selectedUfId, setSelectedUfId] = useState<number | null>(null);
@@ -115,8 +61,8 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
           setCities(citiesData);
           
           // Definir PR como default no primeiro endereço se estiver criando
-          if (!adotante) {
-            form.setValue('enderecos.0.estadoId', parana.id);
+          if (!adopter) {
+            form.setValue('addresses.0.stateId', parana.id);
           }
         }
       } catch (error) {
@@ -143,23 +89,22 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   };
 
   const form = useForm<AdotanteFormData>({
-    resolver: zodResolver(adotanteSchema),
+    resolver: zodResolver(adopterSchema),
     defaultValues: {
-      nome: adotante?.nome || '',
+      name: adopter?.name || '',
       email: '', // Will be populated from contacts if exists
-      dataNascimento: adotante?.dataNascimento?.toISOString().split('T')[0] || '',
-      rg: adotante?.rg || '',
-      cpf: adotante?.cpf || '',
-      contatos: adotante?.contatos || [{ tipo: 'celular' as const, valor: '', principal: true }],
-      profissao: adotante?.profissao || '',
-      estadoCivil: adotante?.estadoCivil || 'solteiro',
-      enderecos: adotante?.enderecos || [{ 
-        rua: '', 
-        bairro: '', 
-        numero: '', 
-        cidadeId: 0, 
-        estadoId: prUfId || 0, 
-        cep: '',
+      dtOfBirth: adopter?.dtOfBirth?.toISOString().split('T')[0] || '',
+      rg: adopter?.rg || '',
+      cpf: adopter?.cpf || '',
+      contacts: adopter?.contacts || [{ type: 'celular' as const, value: '', isPrincipal: true }],
+      profession: adopter?.profession || '',
+      civilState: adopter?.civilState || 'solteiro',
+      addresses: adopter?.addresses || [{ 
+        street: '', 
+        neighborhood: '', 
+        number: '', 
+        cityId: 0, 
+        stateId: prUfId || 0, 
         city: {
           id: 0,
           name: '',
@@ -172,21 +117,20 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
           ibge: 0,
         }
       }],
-      diasParaContato: adotante?.diasParaContato || 30,
-      proximoContato: adotante?.proximoContato,
-      notificacoesAtivas: adotante?.notificacoesAtivas ?? true,
-      animaisVinculados: adotante?.animaisVinculados || [],
+      dtToNotify: adopter?.dtToNotify,
+      activeNotification: adopter?.activeNotification ?? true,
+      animals: [],
     },
   });
 
   const { fields: contatosFields, append: appendContato, remove: removeContato } = useFieldArray({
     control: form.control,
-    name: "contatos"
+    name: "contacts"
   });
 
   const { fields: enderecosFields, append: appendEndereco, remove: removeEndereco } = useFieldArray({
     control: form.control,
-    name: "enderecos"
+    name: "addresses"
   });
 
   const isReadOnly = mode === 'view';
@@ -234,37 +178,35 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
     return labels[estado as keyof typeof labels];
   };
 
-  // Filter functions
-  const filteredAnimais = availableAnimais.filter(animal =>
-    animal.nome.toLowerCase().includes(animalSearch.toLowerCase()) ||
-    animal.raca.toLowerCase().includes(animalSearch.toLowerCase())
-  );
+  // const filteredAnimais = availableAnimais.filter(animal =>
+  //   animal.nome.toLowerCase().includes(animalSearch.toLowerCase()) ||
+  //   animal.raca.toLowerCase().includes(animalSearch.toLowerCase())
+  // );
 
-  // Get linked items
-  const getLinkedAnimais = () => {
-    const linkedIds = form.watch('animaisVinculados') || [];
-    return availableAnimais.filter(animal => linkedIds.includes(animal.id));
-  };
+  // const getLinkedAnimais = () => {
+  //   const linkedIds = form.watch('animaisVinculados') || [];
+  //   return availableAnimais.filter(animal => linkedIds.includes(animal.id));
+  // };
 
-  // Link/Unlink functions
-  const linkAnimal = (animalId: string) => {
-    const currentValues = form.getValues('animaisVinculados') || [];
-    if (!currentValues.includes(animalId)) {
-      form.setValue('animaisVinculados', [...currentValues, animalId]);
-    }
-    setAnimalSearch('');
-    setShowAnimalResults(false);
-  };
+  // const linkAnimal = (animalId: string) => {
+  //   const currentValues = form.getValues('animaisVinculados') || [];
+  //   if (!currentValues.includes(animalId)) {
+  //     form.setValue('animaisVinculados', [...currentValues, animalId]);
+  //   }
+  //   setAnimalSearch('');
+  //   setShowAnimalResults(false);
+  // };
 
-  const unlinkAnimal = (animalId: string) => {
-    const currentValues = form.getValues('animaisVinculados') || [];
-    form.setValue('animaisVinculados', currentValues.filter(id => id !== animalId));
-  };
+  // const unlinkAnimal = (animalId: string) => {
+  //   const currentValues = form.getValues('animaisVinculados') || [];
+  //   form.setValue('animaisVinculados', currentValues.filter(id => id !== animalId));
+  // };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
           const firstKey = Object.keys(errors)[0] as keyof typeof errors | undefined;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const firstMsg = firstKey ? (errors as any)[firstKey]?.message : undefined;
           toast({
             title: 'Verifique os campos',
@@ -284,7 +226,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
             <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
-                name="nome"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nome Completo</FormLabel>
@@ -312,7 +254,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               />
               <FormField
                 control={form.control}
-                name="dataNascimento"
+                name="dtOfBirth"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Data de Nascimento</FormLabel>
@@ -365,7 +307,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="notificacoesAtivas"
+                name="activeNotification"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                     <FormControl>
@@ -390,11 +332,11 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
             </div>
             
             {/* Contact Configuration */}
-            {form.watch('notificacoesAtivas') && (
+            {form.watch('activeNotification') && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                 <FormField
                   control={form.control}
-                  name="proximoContato"
+                  name="dtToNotify"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Data do próximo contato</FormLabel>
@@ -407,7 +349,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                                 "w-full pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
-                              disabled={isReadOnly || !form.watch('notificacoesAtivas')}
+                              disabled={isReadOnly || !form.watch('activeNotification')}
                             >
                               {field.value ? (
                                 format(field.value, "dd/MM/yyyy")
@@ -438,7 +380,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="profissao"
+                name="profession"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Profissão</FormLabel>
@@ -451,7 +393,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               />
               <FormField
                 control={form.control}
-                name="estadoCivil"
+                name="civilState"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Estado Civil</FormLabel>
@@ -510,7 +452,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
-                      name={`contatos.${index}.tipo`}
+                      name={`contacts.${index}.type`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Tipo</FormLabel>
@@ -533,11 +475,11 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                     />
                      <FormField
                        control={form.control}
-                       name={`contatos.${index}.valor`}
+                       name={`contacts.${index}.value`}
                        render={({ field }) => {
-                         const contatoTipo = form.watch(`contatos.${index}.tipo`);
+                         const contactType = form.watch(`contacts.${index}.type`);
                          const getMask = () => {
-                           if (contatoTipo === 'telefone' || contatoTipo === 'celular' || contatoTipo === 'whatsapp') {
+                           if (contactType === 'telefone' || contactType === 'celular' || contactType === 'whatsapp') {
                              return '(99) 99999-9999';
                            }
                            return '';
@@ -552,7 +494,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                                    mask={getMask()}
                                    {...field}
                                    disabled={isReadOnly}
-                                   placeholder={contatoTipo === 'email' ? 'email@exemplo.com' : '(00) 00000-0000'}
+                                   placeholder={'(00) 00000-0000'}
                                  />
                                ) : (
                                  <Input {...field} disabled={isReadOnly} />
@@ -565,9 +507,9 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                      />
                      <FormField
                        control={form.control}
-                       name={`contatos.${index}.principal`}
+                       name={`contacts.${index}.isPrincipal`}
                        render={({ field }) => {
-                         const principalCount = form.watch('contatos').filter(c => c.principal).length;
+                         const principalCount = form.watch('contacts').filter(c => c.isPrincipal).length;
                          const canSetPrincipal = !field.value || principalCount <= 1;
                          
                          return (
@@ -579,11 +521,11 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                                    const newValue = value === 'true';
                                    if (newValue && principalCount > 0 && !field.value) {
                                      // Remove principal from others
-                                     const currentContacts = form.getValues('contatos');
+                                     const currentContacts = form.getValues('contacts');
                                      const updatedContacts = currentContacts.map((contact, idx) => 
                                        idx === index ? { ...contact, principal: true } : { ...contact, principal: false }
                                      );
-                                     form.setValue('contatos', updatedContacts);
+                                     form.setValue('contacts', updatedContacts);
                                    } else {
                                      field.onChange(newValue);
                                    }
@@ -613,7 +555,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendContato({ tipo: 'celular' as const, valor: '', principal: false })}
+                onClick={() => appendContato({ type: 'celular' as const, value: '', isPrincipal: false })}
                 className="w-full"
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -658,7 +600,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                       <div className="md:col-span-3">
                         <FormField
                           control={form.control}
-                          name={`enderecos.${index}.rua`}
+                          name={`addresses.${index}.street`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Rua</FormLabel>
@@ -672,7 +614,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                       </div>
                       <FormField
                         control={form.control}
-                        name={`enderecos.${index}.numero`}
+                        name={`addresses.${index}.number`}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Número</FormLabel>
@@ -687,7 +629,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <FormField
                         control={form.control}
-                        name={`enderecos.${index}.bairro`}
+                        name={`addresses.${index}.neighborhood`}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Bairro</FormLabel>
@@ -700,7 +642,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                       />
                       <FormField
                         control={form.control}
-                        name={`enderecos.${index}.estadoId`}
+                        name={`addresses.${index}.stateId`}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Estado</FormLabel>
@@ -708,7 +650,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                               onValueChange={(value) => {
                                 field.onChange(Number(value));
                                 // Clear city when state changes
-                                form.setValue(`enderecos.${index}.cidadeId`, 0);
+                                form.setValue(`addresses.${index}.stateId`, 0);
                                 // Load cities for the selected state
                                 loadCitiesByUF(Number(value));
                               }} 
@@ -734,7 +676,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                       />
                       <FormField
                         control={form.control}
-                        name={`enderecos.${index}.cidadeId`}
+                        name={`addresses.${index}.cityId`}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Cidade</FormLabel>
@@ -744,11 +686,11 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                                 // Auto-select state when city is selected and store full city object
                                 const selectedCity = cities.find(c => c.id === Number(value));
                                 if (selectedCity) {
-                                  if (!form.getValues(`enderecos.${index}.estadoId`)) {
-                                    form.setValue(`enderecos.${index}.estadoId`, selectedCity.stateUf.id);
+                                  if (!form.getValues(`addresses.${index}.stateId`)) {
+                                    form.setValue(`addresses.${index}.stateId`, selectedCity.stateUf.id);
                                   }
                                   // Store the full city object for backend mapping
-                                  form.setValue(`enderecos.${index}.city`, selectedCity);
+                                  form.setValue(`addresses.${index}.city`, selectedCity);
                                 }
                               }}
                               value={field.value?.toString()} 
@@ -772,24 +714,6 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                           </FormItem>
                         )}
                       />
-                       <FormField
-                         control={form.control}
-                         name={`enderecos.${index}.cep`}
-                         render={({ field }) => (
-                           <FormItem>
-                             <FormLabel>CEP</FormLabel>
-                             <FormControl>
-                               <MaskedInput
-                                 mask="99999-999"
-                                 {...field}
-                                 disabled={isReadOnly}
-                                 placeholder="00000-000"
-                               />
-                             </FormControl>
-                             <FormMessage />
-                           </FormItem>
-                         )}
-                       />
                     </div>
                   </div>
                 </CardContent>
@@ -800,12 +724,11 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                 type="button"
                 variant="outline"
                 onClick={() => appendEndereco({ 
-                  rua: '', 
-                  bairro: '', 
-                  numero: '', 
-                  cidadeId: 0, 
-                  estadoId: prUfId || 0, 
-                  cep: '',
+                  street: '', 
+                  neighborhood: '', 
+                  number: '', 
+                  cityId: 0, 
+                  stateId: prUfId || 0, 
                   city: {
                     id: 0,
                     name: '',
@@ -847,7 +770,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
               </p>
               
               {/* Linked Animals */}
-              {getLinkedAnimais().length > 0 && (
+              {/* {getLinkedAnimais().length > 0 && (
                 <div className="mb-4">
                   <Label className="text-sm font-medium mb-2 block">Animais Vinculados Atualmente:</Label>
                   <div className="space-y-2">
@@ -878,7 +801,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Animal Search */}
               {!isReadOnly && (
@@ -899,7 +822,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                   </div>
                   
                   {/* Animal Search Results */}
-                  {showAnimalResults && animalSearch && (
+                  {/* {showAnimalResults && animalSearch && (
                     <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
                       {filteredAnimais.length > 0 ? (
                         filteredAnimais.map((animal) => {
@@ -945,7 +868,7 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
                         </div>
                       )}
                     </div>
-                  )}
+                  )} */}
                 </div>
               )}
             </div>
@@ -977,4 +900,4 @@ const AdotanteForm: React.FC<AdotanteFormProps> = ({ adotante, onSubmit, onCance
   );
 };
 
-export default AdotanteForm;
+export default AdopterForm;

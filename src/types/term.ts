@@ -1,7 +1,7 @@
-import { Animal } from './animal';
-import { Endereco } from './adotante';
+import { AdopterAddress } from "./adopter";
+import { Animal } from "./animal";
 
-export interface TermoCompromisso {
+export type Term = {
   id: string;
   nome: string;
   rg: string;
@@ -11,8 +11,8 @@ export interface TermoCompromisso {
   contatos: string[];
   profissao: string;
   estadoCivil: string;
-  endereco: Endereco;
+  endereco: AdopterAddress;
   animaisVinculados?: Animal[];
   createdAt: Date;
   updatedAt: Date;
-}
+};

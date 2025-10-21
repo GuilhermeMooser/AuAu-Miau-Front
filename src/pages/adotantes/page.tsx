@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
 import { Users, Plus, Search, Filter, Mail, Phone, Clock, Edit, Eye, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import AdotanteForm from '@/components/forms/AdotanteForm';
-import AdotanteFilters from '@/components/forms/AdotanteFilters';
-import { Adotante, AdotanteFilters as IAdotanteFilters } from '@/types';
+import AdotanteForm from '@/components/forms/Adopter/AdotanteForm';
+import AdotanteFilters from '@/components/forms/Adopter/AdotanteFilters';
 import { useAdotantes } from './useAdotantes';
 
 const AdotantesPage = () => {
@@ -93,31 +91,31 @@ const AdotantesPage = () => {
       {/* Adopters Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
         {adotantes.map((adotante) => {
-          const primaryContact = getPrimaryContact(adotante.contatos);
-          const primaryAddress = getPrimaryAddress(adotante.enderecos);
-          const daysUntilContact = getDaysUntilContact(adotante.proximoContato);
-          const contactDue = isContactDue(adotante.proximoContato);
+          const primaryContact = getPrimaryContact(adotante.contacts);
+          const primaryAddress = getPrimaryAddress(adotante.addresses);
+          const daysUntilContact = getDaysUntilContact(adotante.dtToNotify);
+          const contactDue = isContactDue(adotante.dtToNotify);
 
           return (
             <Card key={adotante.id} className="bg-gradient-card border-border shadow-soft hover:shadow-medium transition-all">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl text-foreground">{adotante.nome}</CardTitle>
+                  <CardTitle className="text-xl text-foreground">{adotante.name}</CardTitle>
                   <div className="flex items-center gap-2">
-                    {contactDue && adotante.notificacoesAtivas && (
+                    {contactDue && adotante.activeNotification && (
                       <Badge variant="destructive" className="text-xs">
                         <Clock className="h-3 w-3 mr-1" />
                         Contato Vencido
                       </Badge>
                     )}
-                    <Badge className={getStatusColor(adotante.status)}>
+                    {/* <Badge className={getStatusColor(adotante.status)}>
                       {adotante.status === 'ativo' ? 'Ativo' : 'Inativo'}
-                    </Badge>
+                    </Badge> TODO*/} 
                   </div>
                 </div>
-                <CardDescription>
+                {/* <CardDescription>
                   Cadastrado em {adotante.createdAt.toLocaleDateString('pt-BR')}
-                </CardDescription>
+                </CardDescription> */}
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -150,7 +148,7 @@ const AdotantesPage = () => {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Profissão: </span>
-                      <span className="text-foreground">{adotante.profissao}</span>
+                      <span className="text-foreground">{adotante.profession}</span>
                     </div>
                   </div>
 
@@ -165,18 +163,18 @@ const AdotantesPage = () => {
                   )}
 
                   {/* Contact schedule */}
-                  {adotante.proximoContato && (
+                  {adotante.dtToNotify && (
                     <div className="text-sm">
                       <span className="text-muted-foreground">Próximo contato: </span>
-                      <span className={`text-foreground ${contactDue && adotante.notificacoesAtivas ? 'text-destructive font-medium' : ''}`}>
-                        {adotante.proximoContato.toLocaleDateString('pt-BR')}
+                      <span className={`text-foreground ${contactDue && adotante.activeNotification ? 'text-destructive font-medium' : ''}`}>
+                        {adotante.dtToNotify.toLocaleDateString('pt-BR')}
                         {daysUntilContact !== null && (
                           <span className="ml-1 text-muted-foreground">
                             ({daysUntilContact > 0 ? `em ${daysUntilContact} dias` : `venceu há ${Math.abs(daysUntilContact)} dias`})
                           </span>
                         )}
                       </span>
-                      {!adotante.notificacoesAtivas && (
+                      {!adotante.activeNotification && (
                         <Badge variant="outline" className="ml-2 text-xs">
                           Notificações Desativadas
                         </Badge>
@@ -187,11 +185,11 @@ const AdotantesPage = () => {
                   {/* Adopted animals */}
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      Animais adotados ({adotante.animaisAdotados.length})
+                      Animais adotados ({adotante?.animals?.length})
                     </p>
-                    {adotante.animaisAdotados.length > 0 ? (
+                    {adotante?.animals?.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
-                        {adotante.animaisAdotados.map((animal, index) => (
+                        {adotante.animals.map((animal, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
                             {animal.nome}
                           </Badge>
@@ -257,7 +255,7 @@ const AdotantesPage = () => {
           </DialogHeader>
           <AdotanteForm
             mode="edit"
-            adotante={selectedAdotante}
+            adopter={selectedAdotante}
             onSubmit={handleEditAdotante}
             onCancel={() => {
               setShowEditModal(false);
@@ -275,7 +273,7 @@ const AdotantesPage = () => {
           </DialogHeader>
           <AdotanteForm
             mode="view"
-            adotante={selectedAdotante}
+            adopter={selectedAdotante}
             onSubmit={() => {}}
             onCancel={() => {
               setShowViewModal(false);
