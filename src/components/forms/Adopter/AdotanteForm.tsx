@@ -112,9 +112,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({ adopter, onSubmit, onCancel, 
             id: prUfId || 0,
             name: 'Paraná',
             acronym: 'PR',
-          country: 1,
           },
-          ibge: 0,
         }
       }],
       dtToNotify: adopter?.dtToNotify,
@@ -738,9 +736,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({ adopter, onSubmit, onCancel, 
                       id: prUfId || 0,
                       name: 'Paraná',
                       acronym: 'PR',
-                      country: 1,
                     },
-                    ibge: 0
                   }
                 })}
                 className="w-full"

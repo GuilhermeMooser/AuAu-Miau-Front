@@ -4,14 +4,12 @@ export type City = {
   id: number;
   name: string;
   stateUf: Uf;
-  ibge: number;
 }
 
 export type Uf = {
   id: number;
   name: string;
   acronym: string;
-  country: number;
 }
 
 export const locationService = {
