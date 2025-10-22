@@ -112,7 +112,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({ adopter, onSubmit, onCancel, 
             id: prUfId || 0,
             name: 'Paraná',
             acronym: 'PR',
-          country: 'Brasil',
+          country: 1,
           },
           ibge: 0,
         }
@@ -138,6 +138,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({ adopter, onSubmit, onCancel, 
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (data: AdotanteFormData) => {
+    console.log(data)
     if (isReadOnly) return;
     try {
       setSubmitting(true);
@@ -205,6 +206,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({ adopter, onSubmit, onCancel, 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+        console.log('errors', errors)
           const firstKey = Object.keys(errors)[0] as keyof typeof errors | undefined;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const firstMsg = firstKey ? (errors as any)[firstKey]?.message : undefined;
@@ -736,9 +738,9 @@ const AdopterForm: React.FC<AdopterFormProps> = ({ adopter, onSubmit, onCancel, 
                       id: prUfId || 0,
                       name: 'Paraná',
                       acronym: 'PR',
-                      country: 'Brasil',
+                      country: 1,
                     },
-                    ibge: 0,
+                    ibge: 0
                   }
                 })}
                 className="w-full"

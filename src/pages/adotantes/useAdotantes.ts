@@ -18,7 +18,7 @@ export const useAdotantes = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   const fetchAdotantes = async () => {
     try {
       setLoading(true);

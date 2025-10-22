@@ -11,7 +11,7 @@ export type Uf = {
   id: number;
   name: string;
   acronym: string;
-  country: string;
+  country: number;
 }
 
 export const locationService = {

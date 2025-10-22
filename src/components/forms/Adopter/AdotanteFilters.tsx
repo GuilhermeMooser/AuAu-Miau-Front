@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { AdotanteFilters } from '@/types';
-import { locationService, UF, City } from '@/services/locationService';
+import { locationService, Uf, City } from '@/services/locationService';
 
 const filtersSchema = z.object({
   status: z.enum(['ativo', 'inativo']).optional(),
@@ -33,7 +33,7 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
   onClearFilters,
   activeFilters,
 }) => {
-  const [ufs, setUfs] = useState<UF[]>([]);
+  const [ufs, setUfs] = useState<Uf[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
 

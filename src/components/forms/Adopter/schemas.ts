@@ -19,7 +19,7 @@ const addressSchema = z.object({
       id: z.number(),
       name: z.string(),
       acronym: z.string(),
-      country: z.string(),
+      country: z.number(),
     }),
     ibge: z.number(),
   }),
