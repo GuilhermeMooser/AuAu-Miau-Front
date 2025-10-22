@@ -9,14 +9,12 @@ const contactSchema = z.object({
 const addressSchema = z.object({
   street: z.string().min(1, "Rua é obrigatória"),
   neighborhood: z.string().min(1, "Bairro é obrigatório"),
-  number: z.string().min(1, "Número é obrigatório"),
-  cityId: z.number().min(1, "Cidade é obrigatória"),
-  stateId: z.number().min(1, "Estado é obrigatório"),
+  number: z.coerce.number().int().positive("Número é obrigatório"),
   city: z.object({
-    id: z.number(),
+    id: z.number().min(1, "Cidade é obrigatória"),
     name: z.string(),
     stateUf: z.object({
-      id: z.number(),
+      id: z.number().min(1, "Estado é obrigatório"),
       name: z.string(),
       acronym: z.string(),
     }),
@@ -48,5 +46,5 @@ export const adopterSchema = z.object({
     .min(1, "Pelo menos um endereço é obrigatório"),
   dtToNotify: z.date().optional(),
   activeNotification: z.boolean(),
-  animals: z.array(z.string()).optional(),
+  animalsIds: z.array(z.string()).optional(),
 });
