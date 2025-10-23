@@ -19,7 +19,7 @@ export type AdopterAddress = {
   id?: string;
   street: string;
   neighborhood: string;
-  number: number;
+  number?: number;
   city: City;
 };
 

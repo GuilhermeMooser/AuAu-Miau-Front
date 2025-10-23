@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import {
@@ -59,6 +58,7 @@ import { cn } from "@/lib/utils";
 import { locationService, City, Uf } from "@/services/locationService";
 import { Adopter, AdotanteFormData } from "@/types";
 import { adopterSchema } from "./schemas";
+import { useFieldArray, useForm } from "react-hook-form";
 
 type AdopterFormProps = {
   adopter?: Adopter;
@@ -142,7 +142,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
     resolver: zodResolver(adopterSchema),
     defaultValues: {
       name: adopter?.name || "",
-      email: "", // Will be populated from contacts if exists
+      email: adopter?.email || "",
       dtOfBirth: adopter?.dtOfBirth?.toISOString().split("T")[0] || "",
       rg: adopter?.rg || "",
       cpf: adopter?.cpf || "",
@@ -151,11 +151,14 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
       ],
       profession: adopter?.profession || "",
       civilState: adopter?.civilState || "solteiro",
-      addresses: adopter?.addresses || [
+      addresses: adopter?.addresses?.map((addr) => ({
+        ...addr,
+        number: addr.number || undefined, // Converter 0 para undefined
+      })) || [
         {
           street: "",
           neighborhood: "",
-          number: 0,
+          number: undefined,
           city: {
             id: 0,
             name: "",
@@ -270,6 +273,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
             | undefined;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const firstMsg = firstKey
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ? (errors as any)[firstKey]?.message
             : undefined;
           toast({
@@ -735,7 +739,20 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                             <FormItem>
                               <FormLabel>Número</FormLabel>
                               <FormControl>
-                                <Input {...field} disabled={isReadOnly} />
+                                <Input
+                                  {...field}
+                                  value={field.value || ""} // MUDANÇA: converte undefined/null para string vazia
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    // Se vazio, passa undefined, senão passa o valor
+                                    field.onChange(
+                                      value === "" ? undefined : value
+                                    );
+                                  }}
+                                  disabled={isReadOnly}
+                                  type="number" // mantém como number para validação do browser
+                                  placeholder="Ex: 123"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -811,14 +828,20 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                                 (c) => c.id === Number(value)
                               );
                               if (selectedCity) {
-                                // Update entire city object
+                                // Atualiza o objeto city completo
                                 form.setValue(
                                   `addresses.${index}.city`,
-                                  selectedCity
+                                  selectedCity,
+                                  { shouldValidate: true } // ADIÇÃO: força validação
                                 );
                               }
                             }}
-                            value={currentCityId?.toString()}
+                            // MUDANÇA: usar value condicional e não usar '0' como fallback
+                            value={
+                              currentCityId > 0
+                                ? currentCityId.toString()
+                                : undefined
+                            }
                             disabled={
                               isReadOnly || loadingLocations || !currentStateId
                             }
@@ -858,7 +881,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                   appendEndereco({
                     street: "",
                     neighborhood: "",
-                    number: 0,
+                    number: undefined, // MUDANÇA: undefined ao invés de 0
                     city: {
                       id: 0,
                       name: "",
