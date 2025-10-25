@@ -58,7 +58,7 @@ export type MinimalAdopter = {
   activeNotification: boolean;
   audit: Audit;
   dtToNotify?: Date;
-  animals?: Animal[];
+  animals?: Partial<Animal>[];
 };
 
 export type FindAllAdoptersPaginated = Pagination<MinimalAdopter>;

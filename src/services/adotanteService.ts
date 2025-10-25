@@ -167,7 +167,7 @@ export const adotanteService = {
     const response = await api.get<FindAllAdoptersPaginated>(
       `/api/adopter/v1?${params.toString()}`
     );
-
+    console.log(response.data.items)
     return {
       items: response.data.items,
       meta: {

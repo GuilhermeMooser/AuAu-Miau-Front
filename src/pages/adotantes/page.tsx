@@ -129,6 +129,11 @@ const AdotantesPage = () => {
           const daysUntilContact = getDaysUntilContact(adotante.dtToNotify);
           const contactDue = isContactDue(adotante.dtToNotify);
 
+          const MAX_ANIMALS_TO_SHOW = 3;
+          const animals = adotante?.animals ?? [];
+          const visibleAnimals = animals.slice(0, MAX_ANIMALS_TO_SHOW);
+          const remainingCount = animals.length - MAX_ANIMALS_TO_SHOW;
+
           return (
             <Card
               key={adotante.id}
@@ -252,21 +257,26 @@ const AdotantesPage = () => {
                   )}
 
                   {/* Animais */}
-                  <div> 
+                  <div>
                     <p className="text-sm text-muted-foreground mb-1">
-                      Animais adotados ({adotante?.animals?.length})
+                      Animais adotados ({animals.length})
                     </p>
-                    {adotante?.animals && adotante?.animals?.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {adotante.animals.map((animal, index) => (
+                    {animals.length > 0 ? (
+                      <div className="flex flex-wrap gap-1 items-center">
+                        {visibleAnimals.map((animal, index) => (
                           <Badge
                             key={index}
                             variant="outline"
                             className="text-xs"
                           >
-                            {animal.nome}
+                            {animal.name}
                           </Badge>
                         ))}
+                        {remainingCount > 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            +{remainingCount} outros
+                          </span>
+                        )}
                       </div>
                     ) : (
                       <p className="text-xs text-muted-foreground">
@@ -276,12 +286,12 @@ const AdotantesPage = () => {
                   </div>
 
                   {/* Actions */}
-                  {/* <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
                     <Button
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => handleEditClick(adotante)}
+                      // onClick={() => handleEditClick(adotante)}
                     >
                       <Edit className="h-3 w-3 sm:mr-1" />
                       <span className="hidden sm:inline ml-1">Editar</span>
@@ -290,14 +300,14 @@ const AdotantesPage = () => {
                       variant="secondary"
                       size="sm"
                       className="flex-1"
-                      onClick={() => handleViewAdotante(adotante)}
+                      // onClick={() => handleViewAdotante(adotante)}
                     >
                       <Eye className="h-3 w-3 sm:mr-1" />
                       <span className="hidden sm:inline ml-1">
                         Ver Detalhes
                       </span>
                     </Button>
-                  </div> */}
+                  </div>
                 </div>
               </CardContent>
             </Card>

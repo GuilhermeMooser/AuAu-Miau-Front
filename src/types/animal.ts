@@ -1,6 +1,6 @@
 export interface Animal {
   id: string;
-  nome: string;
+  name: string;
   tipo: 'cao' | 'gato';
   raca: string;
   idade: number;
