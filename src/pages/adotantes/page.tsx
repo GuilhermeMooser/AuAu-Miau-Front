@@ -1,12 +1,36 @@
-import { Users, Plus, Search, Filter, Mail, Phone, Clock, Edit, Eye, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import AdotanteForm from '@/components/forms/Adopter/AdotanteForm';
-import AdotanteFilters from '@/components/forms/Adopter/AdotanteFilters';
-import { useAdotantes } from './useAdotantes';
+import {
+  Users,
+  Plus,
+  Search,
+  Filter,
+  Mail,
+  Phone,
+  Clock,
+  Edit,
+  Eye,
+  Calendar,
+} from "lucide-react";
+import { useAdotantes } from "./useAdotantes";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import AdotanteFilters from "../../components/forms/Adopter/AdotanteFilters";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
+import AdotanteForm from "../../components/forms/Adopter/AdotanteForm";
+import { formatDate } from "@/utils/formatDate";
+import { formatCPF, formatPhoneNumber } from "@/utils/format";
 
 const AdotantesPage = () => {
   const {
@@ -43,12 +67,17 @@ const AdotantesPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Adotantes</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+            Adotantes
+          </h1>
           <p className="text-sm md:text-base text-muted-foreground">
             Gerencie todos os adotantes cadastrados
           </p>
         </div>
-        <Button className="shadow-glow w-full sm:w-auto" onClick={() => setShowCreateModal(true)}>
+        <Button
+          className="shadow-glow w-full sm:w-auto"
+          onClick={() => setShowCreateModal(true)}
+        >
           <Plus className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">Cadastrar Adotante</span>
           <span className="sm:hidden">Cadastrar</span>
@@ -68,7 +97,11 @@ const AdotantesPage = () => {
             />
           </div>
         </div>
-        <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowFilters(!showFilters)}>
+        <Button
+          variant="outline"
+          className="w-full sm:w-auto"
+          onClick={() => setShowFilters(!showFilters)}
+        >
           <Filter className="mr-2 h-4 w-4" />
           Filtros
           {Object.keys(filters).length > 0 && (
@@ -97,25 +130,44 @@ const AdotantesPage = () => {
           const contactDue = isContactDue(adotante.dtToNotify);
 
           return (
-            <Card key={adotante.id} className="bg-gradient-card border-border shadow-soft hover:shadow-medium transition-all">
+            <Card
+              key={adotante.id}
+              className="bg-gradient-card border-border shadow-soft hover:shadow-medium transition-all"
+            >
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl text-foreground">{adotante.name}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    {contactDue && adotante.activeNotification && (
+                <div className="flex flex-col">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xl text-foreground">
+                      {adotante.name}
+                    </CardTitle>
+
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        className={`${
+                          adotante.audit.deletedAt === null
+                            ? "bg-success text-success-foreground"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {adotante.audit.deletedAt === null
+                          ? "Ativo"
+                          : "Inativo"}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {contactDue && adotante.activeNotification && (
+                    <div className="flex items-center justify-end mt-1">
                       <Badge variant="destructive" className="text-xs">
                         <Clock className="h-3 w-3 mr-1" />
                         Contato Vencido
                       </Badge>
-                    )}
-                    {/* <Badge className={getStatusColor(adotante.status)}>
-                      {adotante.status === 'ativo' ? 'Ativo' : 'Inativo'}
-                    </Badge> TODO*/} 
-                  </div>
+                    </div>
+                  )}
                 </div>
-                {/* <CardDescription>
-                  Cadastrado em {adotante.createdAt.toLocaleDateString('pt-BR')}
-                </CardDescription> */}
+                <CardDescription>
+                  Cadastrado em {formatDate(adotante.audit.createdAt)}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -123,19 +175,23 @@ const AdotantesPage = () => {
                   <div className="w-full h-32 bg-gradient-primary rounded-lg flex items-center justify-center">
                     <Users className="h-16 w-16 text-white opacity-50" />
                   </div>
-                  
+
                   {/* Contact info */}
                   <div className="space-y-2">
-                    {primaryContact?.tipo === 'email' && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-foreground truncate">{primaryContact.valor}</span>
-                      </div>
-                    )}
-                    {(primaryContact?.tipo === 'telefone' || primaryContact?.tipo === 'celular' || primaryContact?.tipo === 'whatsapp') && (
+                    <div className="flex items-center space-x-2 text-sm">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-foreground truncate">
+                        {adotante.email}
+                      </span>
+                    </div>
+                    {(primaryContact?.type === "telefone" ||
+                      primaryContact?.type === "celular" ||
+                      primaryContact?.type === "whatsapp") && (
                       <div className="flex items-center space-x-2 text-sm">
                         <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-foreground">{primaryContact.valor}</span>
+                        <span className="text-foreground">
+                          {formatPhoneNumber(primaryContact.value)}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -144,73 +200,104 @@ const AdotantesPage = () => {
                   <div className="space-y-1 text-sm">
                     <div>
                       <span className="text-muted-foreground">CPF: </span>
-                      <span className="text-foreground">{adotante.cpf}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Profissão: </span>
-                      <span className="text-foreground">{adotante.profession}</span>
+                      <span className="text-foreground">
+                        {formatCPF(adotante.cpf)}
+                      </span>
                     </div>
                   </div>
 
                   {/* Location */}
                   {primaryAddress && (
                     <div className="text-sm">
-                      <span className="text-muted-foreground">Localização: </span>
+                      <span className="text-muted-foreground">
+                        Localização:{" "}
+                      </span>
                       <span className="text-foreground">
-                        {primaryAddress.cidade}, {primaryAddress.estado}
+                        {primaryAddress.city.name},{" "}
+                        {primaryAddress.city.stateUf.acronym}
                       </span>
                     </div>
                   )}
 
-                  {/* Contact schedule */}
-                  {adotante.dtToNotify && (
+                  {adotante.activeNotification && adotante.dtToNotify ? (
                     <div className="text-sm">
-                      <span className="text-muted-foreground">Próximo contato: </span>
-                      <span className={`text-foreground ${contactDue && adotante.activeNotification ? 'text-destructive font-medium' : ''}`}>
-                        {adotante.dtToNotify.toLocaleDateString('pt-BR')}
-                        {daysUntilContact !== null && (
+                      <span className="text-muted-foreground">
+                        Próximo contato:{" "}
+                      </span>
+                      <span
+                        className={`${
+                          contactDue
+                            ? "text-destructive font-medium"
+                            : "text-foreground"
+                        }`}
+                      >
+                        {formatDate(adotante.dtToNotify)}
+                        {daysUntilContact && (
                           <span className="ml-1 text-muted-foreground">
-                            ({daysUntilContact > 0 ? `em ${daysUntilContact} dias` : `venceu há ${Math.abs(daysUntilContact)} dias`})
+                            (
+                            {daysUntilContact > 0
+                              ? `em ${daysUntilContact} dias`
+                              : daysUntilContact === 0
+                              ? "hoje"
+                              : `venceu há ${Math.abs(daysUntilContact)} dias`}
+                            )
                           </span>
                         )}
                       </span>
-                      {!adotante.activeNotification && (
-                        <Badge variant="outline" className="ml-2 text-xs">
-                          Notificações Desativadas
-                        </Badge>
-                      )}
                     </div>
+                  ) : (
+                    <Badge variant="outline" className="text-xs">
+                      Notificações Desativadas
+                    </Badge>
                   )}
 
-                  {/* Adopted animals */}
-                  <div>
+                  {/* Animais */}
+                  <div> 
                     <p className="text-sm text-muted-foreground mb-1">
                       Animais adotados ({adotante?.animals?.length})
                     </p>
-                    {adotante?.animals?.length > 0 ? (
+                    {adotante?.animals && adotante?.animals?.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {adotante.animals.map((animal, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {animal.nome}
                           </Badge>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-muted-foreground">Nenhum animal adotado</p>
+                      <p className="text-xs text-muted-foreground">
+                        Nenhum animal adotado
+                      </p>
                     )}
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEditClick(adotante)}>
+                  {/* <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleEditClick(adotante)}
+                    >
                       <Edit className="h-3 w-3 sm:mr-1" />
                       <span className="hidden sm:inline ml-1">Editar</span>
                     </Button>
-                    <Button variant="secondary" size="sm" className="flex-1" onClick={() => handleViewAdotante(adotante)}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleViewAdotante(adotante)}
+                    >
                       <Eye className="h-3 w-3 sm:mr-1" />
-                      <span className="hidden sm:inline ml-1">Ver Detalhes</span>
+                      <span className="hidden sm:inline ml-1">
+                        Ver Detalhes
+                      </span>
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               </CardContent>
             </Card>
@@ -222,7 +309,9 @@ const AdotantesPage = () => {
       {adotantes.length === 0 && (
         <div className="text-center py-12">
           <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">Nenhum adotante encontrado</h3>
+          <h3 className="text-lg font-medium text-foreground mb-2">
+            Nenhum adotante encontrado
+          </h3>
           <p className="text-muted-foreground mb-4">
             Comece cadastrando o primeiro adotante
           </p>

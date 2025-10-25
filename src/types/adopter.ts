@@ -48,7 +48,20 @@ export type Adopter = {
   audit: Audit;
 };
 
-export type FindAllAdoptersPaginated = Pagination<Adopter>
+export type MinimalAdopter = {
+  id: string;
+  name: string;
+  cpf: string;
+  email: string;
+  addresses: AdopterAddress[];
+  contacts: AdopterContact[];
+  activeNotification: boolean;
+  audit: Audit;
+  dtToNotify?: Date;
+  animals?: Animal[];
+};
+
+export type FindAllAdoptersPaginated = Pagination<MinimalAdopter>;
 
 export type CreateAdopterDto = {
   name: string;
@@ -63,7 +76,7 @@ export type CreateAdopterDto = {
   activeNotification: boolean;
   dtToNotify?: Date | null;
   animalsIds?: string[];
-}
+};
 
 export type AdotanteFormData = z.infer<typeof adopterSchema>;
 

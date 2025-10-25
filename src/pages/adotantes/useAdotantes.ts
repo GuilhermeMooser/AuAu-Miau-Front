@@ -1,8 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { Adopter, AdotanteFilters, CreateAdopterDto } from "@/types";
-import { adotanteService } from "@/services/adotanteService";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "../../hooks/use-toast";
+import {
+  Adopter,
+  AdopterAddress,
+  AdopterContact,
+  AdotanteFilters,
+  CreateAdopterDto,
+  MinimalAdopter,
+} from "../../types";
+import { adotanteService } from "../../services/adotanteService";
+import { useQuery } from "@tanstack/react-query";
+import { adoptersCache } from "@/constants/cacheNames";
 
 export const useAdotantes = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -14,24 +23,34 @@ export const useAdotantes = () => {
   >();
   const [filters, setFilters] = useState<AdotanteFilters>({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [adotantes, setAdotantes] = useState<Adopter[]>([]);
+  const [adotantes, setAdotantes] = useState<MinimalAdopter[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  console.log(adotantes);
   const fetchAdotantes = async () => {
     try {
       setLoading(true);
       const response = await adotanteService.list(filters, page, 100);
 
-      const adoptersFormated: Adopter[] = response.data.map((item) => {
-        const adopter: Adopter = {...item, dtToNotify: new Date(item.dtToNotify)}
+      const adoptersFormated: MinimalAdopter[] = response.items.map(
+        (adotante) => ({
+          ...adotante,
+          dtToNotify: adotante.dtToNotify ? new Date(adotante.dtToNotify) : undefined,
+          audit: {
+            ...adotante.audit,
+            createdAt: new Date(adotante.audit.createdAt),
+            updatedAt: new Date(adotante.audit.updatedAt),
+            deletedAt: adotante.audit.deletedAt
+              ? new Date(adotante.audit.deletedAt)
+              : null,
+          },
+        })
+      );
 
-        return adopter
-      });
-
+      const totalPages = response.meta.totalPages;
       setAdotantes(adoptersFormated);
-      setTotalPages(response.totalPages);
+      setTotalPages(totalPages);
     } catch (error) {
       console.error("Error fetching adotantes:", error);
       toast({
@@ -59,12 +78,12 @@ export const useAdotantes = () => {
     }
   };
 
-  const getPrimaryContact = (contatos: any[]) => {
-    return contatos.find((c) => c.principal) || contatos[0];
+  const getPrimaryContact = (contatos: AdopterContact[]) => {
+    return contatos?.find((c) => c.isPrincipal) || contatos[0];
   };
 
-  const getPrimaryAddress = (enderecos: any[]) => {
-    return enderecos.find((e) => e.tipo === "residencial") || enderecos[0];
+  const getPrimaryAddress = (enderecos: AdopterAddress[]) => {
+    return enderecos[0];
   };
 
   const isContactDue = (proximoContato?: Date) => {

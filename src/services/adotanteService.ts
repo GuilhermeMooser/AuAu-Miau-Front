@@ -1,5 +1,11 @@
 import { api } from "./api";
-import { Adopter, AdotanteFilters, CreateAdopterDto, FindAllAdoptersPaginated } from "@/types/adopter";
+import {
+  Adopter,
+  AdotanteFilters,
+  CreateAdopterDto,
+  FindAllAdoptersPaginated,
+  MinimalAdopter,
+} from "@/types/adopter";
 
 // Backend response structure
 // type BackendAdotanteProps = {
@@ -31,7 +37,6 @@ import { Adopter, AdotanteFilters, CreateAdopterDto, FindAllAdoptersPaginated } 
 // interface BackendAdotanteResponse {
 //   props: BackendAdotanteProps;
 // }
-
 
 // export interface AdotanteListResponse {
 //   data: Adotante[];
@@ -145,8 +150,7 @@ export const adotanteService = {
     filters?: AdotanteFilters,
     page = 1,
     limit = 100
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> => { //TODO
+  ): Promise<FindAllAdoptersPaginated> => {
     const params = new URLSearchParams();
 
     if (filters) {
@@ -163,43 +167,37 @@ export const adotanteService = {
     const response = await api.get<FindAllAdoptersPaginated>(
       `/api/adopter/v1?${params.toString()}`
     );
-    console.log('response', response)
 
     return {
-      data: response.data.items,
-      total: response.data.meta.totalItems,
-      page: response.data.meta.currentPage,
-      limit: response.data.meta.itemsPerPage,
-      totalPages: response.data.meta.totalPages,
+      items: response.data.items,
+      meta: {
+        currentPage: response.data.meta.currentPage,
+        totalPages: response.data.meta.totalPages,
+        itemsPerPage: response.data.meta.itemsPerPage,
+        totalItems: response.data.meta.totalItems,
+        itemCount: response.data.meta.itemCount,
+      },
     };
   },
 
   // Buscar adotante por ID
   getById: async (id: string): Promise<Adopter> => {
-    const response = await api.get<Adopter>(
-      `/api/adopter/v1/${id}`
-    );
+    const response = await api.get<Adopter>(`/api/adopter/v1/${id}`);
     return response.data;
   },
 
   // Criar novo adotante
   create: async (data: CreateAdopterDto): Promise<Adopter> => {
     // const backendData = mapFrontendToBackend(data);
-    console.log(data)
-    const response = await api.post<Adopter>(
-      "/api/adopter/v1",
-      data
-    );
+    console.log(data);
+    const response = await api.post<Adopter>("/api/adopter/v1", data);
     return response.data;
   },
 
   // Atualizar adotante
   update: async (id: string, data: Adopter): Promise<Adopter> => {
     // const backendData = mapFrontendToBackend(data);
-    const response = await api.put<Adopter>(
-      `/api/adopter/v1/${id}`,
-      data
-    );
+    const response = await api.put<Adopter>(`/api/adopter/v1/${id}`, data);
     return response.data;
   },
 
@@ -209,7 +207,7 @@ export const adotanteService = {
   },
 
   // Buscar adotantes por nome ou CPF
-  search: async (query: string): Promise<Adopter[]> => {
+  search: async (query: string): Promise<MinimalAdopter[]> => {
     const response = await api.get<FindAllAdoptersPaginated>(
       `/api/adopter/v1?search=${encodeURIComponent(query)}`
     );
