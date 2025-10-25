@@ -137,72 +137,73 @@ const AdotantesPage = () => {
           return (
             <Card
               key={adotante.id}
-              className="bg-gradient-card border-border shadow-soft hover:shadow-medium transition-all"
+              className="bg-gradient-card border-border shadow-soft hover:shadow-medium transition-all flex flex-col h-full"
             >
-              <CardHeader>
+              <CardHeader className="flex-shrink-0">
                 <div className="flex flex-col">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-1">
                     <CardTitle className="text-xl text-foreground">
                       {adotante.name}
                     </CardTitle>
 
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        className={`${
-                          adotante.audit.deletedAt === null
-                            ? "bg-success text-success-foreground"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {adotante.audit.deletedAt === null
-                          ? "Ativo"
-                          : "Inativo"}
-                      </Badge>
-                    </div>
+                    <Badge
+                      className={`${
+                        adotante.audit.deletedAt === null
+                          ? "bg-success text-success-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {adotante.audit.deletedAt === null ? "Ativo" : "Inativo"}
+                    </Badge>
                   </div>
 
-                  {contactDue && adotante.activeNotification && (
-                    <div className="flex items-center justify-end mt-1">
+                  {/* Espaço reservado para o badge de contato vencido - sempre ocupa espaço */}
+                  <div className="flex items-center justify-end h-6">
+                    {contactDue && adotante.activeNotification && (
                       <Badge variant="destructive" className="text-xs">
                         <Clock className="h-3 w-3 mr-1" />
                         Contato Vencido
                       </Badge>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
                 <CardDescription>
                   Cadastrado em {formatDate(adotante.audit.createdAt)}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Profile icon */}
-                  <div className="w-full h-32 bg-gradient-primary rounded-lg flex items-center justify-center">
+
+              <CardContent className="flex-grow flex flex-col">
+                <div className="space-y-4 flex-grow flex flex-col">
+                  {/* Profile icon - altura fixa */}
+                  <div className="w-full h-32 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
                     <Users className="h-16 w-16 text-white opacity-50" />
                   </div>
 
-                  {/* Contact info */}
-                  <div className="space-y-2">
+                  {/* Contact info - altura fixa */}
+                  <div className="space-y-2 flex-shrink-0">
                     <div className="flex items-center space-x-2 text-sm">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <span className="text-foreground truncate">
                         {adotante.email}
                       </span>
                     </div>
-                    {(primaryContact?.type === "telefone" ||
-                      primaryContact?.type === "celular" ||
-                      primaryContact?.type === "whatsapp") && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-foreground">
-                          {formatPhoneNumber(primaryContact.value)}
-                        </span>
-                      </div>
-                    )}
+                    {/* Espaço reservado para telefone - sempre ocupa espaço */}
+                    <div className="flex items-center space-x-2 text-sm h-5">
+                      {(primaryContact?.type === "telefone" ||
+                        primaryContact?.type === "celular" ||
+                        primaryContact?.type === "whatsapp") && (
+                        <>
+                          <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-foreground">
+                            {formatPhoneNumber(primaryContact.value)}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Basic info */}
-                  <div className="space-y-1 text-sm">
+                  {/* Basic info - altura fixa */}
+                  <div className="space-y-1 text-sm flex-shrink-0">
                     <div>
                       <span className="text-muted-foreground">CPF: </span>
                       <span className="text-foreground">
@@ -211,53 +212,60 @@ const AdotantesPage = () => {
                     </div>
                   </div>
 
-                  {/* Location */}
-                  {primaryAddress && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">
-                        Localização:{" "}
-                      </span>
-                      <span className="text-foreground">
-                        {primaryAddress.city.name},{" "}
-                        {primaryAddress.city.stateUf.acronym}
-                      </span>
-                    </div>
-                  )}
+                  {/* Location - altura fixa */}
+                  <div className="text-sm flex-shrink-0 h-5">
+                    {primaryAddress && (
+                      <>
+                        <span className="text-muted-foreground">
+                          Localização:{" "}
+                        </span>
+                        <span className="text-foreground">
+                          {primaryAddress.city.name},{" "}
+                          {primaryAddress.city.stateUf.acronym}
+                        </span>
+                      </>
+                    )}
+                  </div>
 
-                  {adotante.activeNotification && adotante.dtToNotify ? (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">
-                        Próximo contato:{" "}
-                      </span>
-                      <span
-                        className={`${
-                          contactDue
-                            ? "text-destructive font-medium"
-                            : "text-foreground"
-                        }`}
-                      >
-                        {formatDate(adotante.dtToNotify)}
-                        {daysUntilContact && (
-                          <span className="ml-1 text-muted-foreground">
-                            (
-                            {daysUntilContact > 0
-                              ? `em ${daysUntilContact} dias`
-                              : daysUntilContact === 0
-                              ? "hoje"
-                              : `venceu há ${Math.abs(daysUntilContact)} dias`}
-                            )
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                  ) : (
-                    <Badge variant="outline" className="text-xs">
-                      Notificações Desativadas
-                    </Badge>
-                  )}
+                  {/* Próximo contato - altura fixa */}
+                  <div className="text-sm flex-shrink-0 min-h-[3rem]">
+                    {adotante.activeNotification && adotante.dtToNotify ? (
+                      <>
+                        <span className="text-muted-foreground">
+                          Próximo contato:{" "}
+                        </span>
+                        <span
+                          className={`${
+                            contactDue
+                              ? "text-destructive font-medium"
+                              : "text-foreground"
+                          }`}
+                        >
+                          {formatDate(adotante.dtToNotify)}
+                          {daysUntilContact && (
+                            <span className="ml-1 text-muted-foreground">
+                              (
+                              {daysUntilContact > 0
+                                ? `em ${daysUntilContact} dias`
+                                : daysUntilContact === 0
+                                ? "hoje"
+                                : `venceu há ${Math.abs(
+                                    daysUntilContact
+                                  )} dias`}
+                              )
+                            </span>
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        Notificações Desativadas
+                      </Badge>
+                    )}
+                  </div>
 
-                  {/* Animais */}
-                  <div>
+                  {/* Animais - altura fixa */}
+                  <div className="flex-shrink-0 min-h-[4rem]">
                     <p className="text-sm text-muted-foreground mb-1">
                       Animais adotados ({animals.length})
                     </p>
@@ -285,8 +293,8 @@ const AdotantesPage = () => {
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                  {/* Actions - sempre no final */}
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2 mt-auto">
                     <Button
                       variant="outline"
                       size="sm"
