@@ -746,7 +746,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                                     const value = e.target.value;
                                     // Se vazio, passa undefined, senão passa o valor
                                     field.onChange(
-                                      value === "" ? undefined : value
+                                      value === "" ? undefined : Number(value)
                                     );
                                   }}
                                   disabled={isReadOnly}
