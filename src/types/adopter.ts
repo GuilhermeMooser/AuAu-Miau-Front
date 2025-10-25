@@ -65,7 +65,7 @@ export type FindAllAdoptersPaginated = Pagination<MinimalAdopter>;
 
 export type CreateAdopterDto = {
   name: string;
-  dtOfBirth: string;
+  dtOfBirth: Date;
   rg: string;
   cpf: string;
   email: string;

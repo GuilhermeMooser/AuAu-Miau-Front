@@ -29,7 +29,7 @@ const addressSchema = z.object({
 export const adopterSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email inválido"),
-  dtOfBirth: z.string().min(1, "Data de nascimento é obrigatória"),
+  dtOfBirth: z.date().min(1, "Data de nascimento é obrigatória"),
   rg: z.string().min(1, "RG é obrigatório"),
   cpf: z.string().min(11, "CPF inválido"),
   contacts: z

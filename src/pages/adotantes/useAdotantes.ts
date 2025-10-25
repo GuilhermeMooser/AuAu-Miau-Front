@@ -10,17 +10,20 @@ import {
   MinimalAdopter,
 } from "../../types";
 import { adotanteService } from "../../services/adotanteService";
-import { useQuery } from "@tanstack/react-query";
-import { adoptersCache } from "@/constants/cacheNames";
 
 export const useAdotantes = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedMinimalAdotante, setSelectedMinimalAdotante] = useState<
+    MinimalAdopter | undefined
+  >();
+
   const [selectedAdotante, setSelectedAdotante] = useState<
     Adopter | undefined
   >();
+
   const [filters, setFilters] = useState<AdotanteFilters>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [adotantes, setAdotantes] = useState<MinimalAdopter[]>([]);
@@ -124,17 +127,17 @@ export const useAdotantes = () => {
   };
 
   const handleEditAdotante = async (data: any) => {
-    if (!selectedAdotante) return;
+    if (!selectedMinimalAdotante) return;
 
     try {
       setLoading(true);
-      await adotanteService.update(selectedAdotante.id, data);
+      await adotanteService.update(selectedMinimalAdotante.id, data);
       toast({
         title: "Sucesso",
         description: "Adotante atualizado com sucesso",
       });
       setShowEditModal(false);
-      setSelectedAdotante(undefined);
+      setSelectedMinimalAdotante(undefined);
       await fetchAdotantes();
     } catch (error) {
       console.error("Error updating adotante:", error);
@@ -170,12 +173,13 @@ export const useAdotantes = () => {
   };
 
   const handleViewAdotante = (adotante: Adopter) => {
-    setSelectedAdotante(adotante);
+    setSelectedMinimalAdotante(adotante);
     setShowViewModal(true);
   };
 
-  const handleEditClick = (adotante: Adopter) => {
-    setSelectedAdotante(adotante);
+  const handleEditClick = async ({id}: MinimalAdopter) => {
+    const selectedAdopter = await adotanteService.getById(id)
+    setSelectedAdotante(selectedAdopter);
     setShowEditModal(true);
   };
 
@@ -196,14 +200,16 @@ export const useAdotantes = () => {
     setShowViewModal,
     showFilters,
     setShowFilters,
-    selectedAdotante,
-    setSelectedAdotante,
+    selectedMinimalAdotante,
+    setSelectedMinimalAdotante,
     filters,
     setFilters,
     searchTerm,
     setSearchTerm,
     adotantes,
     loading,
+    selectedAdotante,
+    setSelectedAdotante,
     page,
     setPage,
     totalPages,

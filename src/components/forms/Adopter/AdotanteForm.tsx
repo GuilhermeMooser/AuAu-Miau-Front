@@ -59,6 +59,8 @@ import { locationService, City, Uf } from "@/services/locationService";
 import { Adopter, AdotanteFormData } from "@/types";
 import { adopterSchema } from "./schemas";
 import { useFieldArray, useForm } from "react-hook-form";
+import { formatDate } from "@/utils/formatDate";
+import { formatPhoneNumber } from "@/utils/format";
 
 type AdopterFormProps = {
   adopter?: Adopter;
@@ -143,7 +145,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
     defaultValues: {
       name: adopter?.name || "",
       email: adopter?.email || "",
-      dtOfBirth: adopter?.dtOfBirth?.toISOString().split("T")[0] || "",
+      dtOfBirth: adopter?.dtOfBirth || undefined,
       rg: adopter?.rg || "",
       cpf: adopter?.cpf || "",
       contacts: adopter?.contacts || [
@@ -273,8 +275,8 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
             | undefined;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const firstMsg = firstKey
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ? (errors as any)[firstKey]?.message
+            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (errors as any)[firstKey]?.message
             : undefined;
           toast({
             title: "Verifique os campos",
@@ -314,7 +316,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
@@ -322,12 +324,14 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                         {...field}
                         disabled={isReadOnly}
                         placeholder="email@exemplo.com"
+                        className="bg-[#020817] border border-border text-white" // mesmo fundo e borda
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="dtOfBirth"
@@ -335,13 +339,29 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                   <FormItem>
                     <FormLabel>Data de Nascimento</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} disabled={isReadOnly} />
+                      <Input
+                        type="date"
+                        disabled={isReadOnly}
+                        value={
+                          field.value
+                            ? formatDate(field.value, { dateStyle: "short" })
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const dateValue = e.target.value
+                            ? new Date(e.target.value)
+                            : undefined;
+                          field.onChange(dateValue);
+                        }}
+                        className="bg-[#0a0f1a] border border-border text-white"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -558,7 +578,6 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                             <SelectContent>
                               <SelectItem value="telefone">Telefone</SelectItem>
                               <SelectItem value="celular">Celular</SelectItem>
-                              <SelectItem value="email">Email</SelectItem>
                               <SelectItem value="whatsapp">WhatsApp</SelectItem>
                             </SelectContent>
                           </Select>
@@ -596,7 +615,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                                   placeholder={"(00) 00000-0000"}
                                 />
                               ) : (
-                                <Input {...field} disabled={isReadOnly} />
+                                <Input defaultValue={formatPhoneNumber(field.value)} disabled={isReadOnly} />
                               )}
                             </FormControl>
                             <FormMessage />

@@ -42,6 +42,8 @@ const AdotantesPage = () => {
     setShowViewModal,
     showFilters,
     setShowFilters,
+    selectedMinimalAdotante,
+    setSelectedMinimalAdotante,
     selectedAdotante,
     setSelectedAdotante,
     filters,
@@ -299,7 +301,7 @@ const AdotantesPage = () => {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      // onClick={() => handleEditClick(adotante)}
+                      onClick={() => handleEditClick(adotante)}
                     >
                       <Edit className="h-3 w-3 sm:mr-1" />
                       <span className="hidden sm:inline ml-1">Editar</span>
@@ -353,7 +355,6 @@ const AdotantesPage = () => {
           />
         </DialogContent>
       </Dialog>
-
       {/* Edit Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
