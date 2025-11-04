@@ -4,11 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Search, Filter, Calendar, MapPin, Briefcase, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { DatePicker } from '@/components/ui/date-picker';
 import { AdotanteFilters } from '@/types';
 import { locationService, Uf, City } from '@/services/locationService';
 
@@ -16,8 +16,8 @@ const filtersSchema = z.object({
   status: z.enum(['ativo', 'inativo']).optional(),
   cidade: z.string().optional(),
   estado: z.string().optional(),
-  dataInicio: z.string().optional(),
-  proximoContato: z.string().optional(),
+  dataInicio: z.date().optional(),
+  proximoContato: z.date().optional(),
 });
 
 type FiltersFormData = z.infer<typeof filtersSchema>;
@@ -43,8 +43,8 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
       status: activeFilters.status,
       cidade: activeFilters.cidade || '',
       estado: activeFilters.estado || '',
-      dataInicio: activeFilters.dataInicio?.toISOString().split('T')[0] || '',
-      proximoContato: activeFilters.proximoContato?.toISOString().split('T')[0] || '',
+      dataInicio: activeFilters.dataInicio,
+      proximoContato: activeFilters.proximoContato,
     },
   });
 
@@ -86,11 +86,7 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
   }, [selectedEstado, form]);
 
   const handleSubmit = (data: FiltersFormData) => {
-    const filters: AdotanteFilters = {
-      ...data,
-      dataInicio: data.dataInicio ? new Date(data.dataInicio) : undefined,
-      proximoContato: data.proximoContato ? new Date(data.proximoContato) : undefined,
-    };
+    const filters: AdotanteFilters = { ...data };
     
     // Remove empty values
     Object.keys(filters).forEach(key => {
@@ -108,8 +104,8 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
       status: undefined,
       cidade: '',
       estado: '',
-      dataInicio: '',
-      proximoContato: '',
+      dataInicio: undefined,
+      proximoContato: undefined,
     });
     setCities([]);
     onClearFilters();
@@ -253,7 +249,11 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
                   <FormItem>
                     <FormLabel>Data de Cadastro (Início)</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <DatePicker
+                        date={field.value}
+                        onDateChange={field.onChange}
+                        placeholder="Selecione a data"
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -265,7 +265,11 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
                   <FormItem>
                     <FormLabel>Próximo Contato</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <DatePicker
+                        date={field.value}
+                        onDateChange={field.onChange}
+                        placeholder="Selecione a data"
+                      />
                     </FormControl>
                   </FormItem>
                 )}

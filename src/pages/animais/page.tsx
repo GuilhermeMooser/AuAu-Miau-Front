@@ -49,7 +49,7 @@ const AnimaisPage = () => {
           <Card key={animal.id} className="bg-gradient-card border-border shadow-soft hover:shadow-medium transition-all">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xl text-foreground">{animal.nome}</CardTitle>
+                <CardTitle className="text-xl text-foreground">{animal.name}</CardTitle>
                 <Badge className={getStatusColor(animal.status)}>
                   {getStatusText(animal.status)}
                 </Badge>

@@ -5,7 +5,7 @@ export const useAnimais = () => {
   const animais: Animal[] = [
     {
       id: '1',
-      nome: 'Bella',
+      name: 'Bella',
       tipo: 'cao',
       raca: 'Labrador',
       idade: 2,
@@ -21,7 +21,7 @@ export const useAnimais = () => {
     },
     {
       id: '2',
-      nome: 'Rex',
+      name: 'Rex',
       tipo: 'cao',
       raca: 'Pastor Alemão',
       idade: 3,
@@ -37,7 +37,7 @@ export const useAnimais = () => {
     },
     {
       id: '3',
-      nome: 'Mimi',
+      name: 'Mimi',
       tipo: 'gato',
       raca: 'Persa',
       idade: 1,
