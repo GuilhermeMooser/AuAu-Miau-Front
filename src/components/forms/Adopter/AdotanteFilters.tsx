@@ -1,19 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Search, Filter, Calendar, MapPin, Briefcase, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { DatePicker } from '@/components/ui/date-picker';
-import { AdotanteFilters } from '@/types';
-import { locationService, Uf, City } from '@/services/locationService';
+import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Search, Filter, Calendar, MapPin, Briefcase, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { DatePicker } from "@/components/ui/date-picker";
+import { AdotanteFilters } from "@/types";
+import { locationService, UF, City } from "@/services/locationService";
 
 const filtersSchema = z.object({
-  status: z.enum(['ativo', 'inativo']).optional(),
+  status: z.enum(["ativo", "inativo"]).optional(),
   cidade: z.string().optional(),
   estado: z.string().optional(),
   dataInicio: z.date().optional(),
@@ -33,7 +45,7 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
   onClearFilters,
   activeFilters,
 }) => {
-  const [ufs, setUfs] = useState<Uf[]>([]);
+  const [ufs, setUfs] = useState<UF[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
 
@@ -41,14 +53,14 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
     resolver: zodResolver(filtersSchema),
     defaultValues: {
       status: activeFilters.status,
-      cidade: activeFilters.cidade || '',
-      estado: activeFilters.estado || '',
+      cidade: activeFilters.cidade || "",
+      estado: activeFilters.estado || "",
       dataInicio: activeFilters.dataInicio,
       proximoContato: activeFilters.proximoContato,
     },
   });
 
-  const selectedEstado = form.watch('estado');
+  const selectedEstado = form.watch("estado");
 
   useEffect(() => {
     const loadUFs = async () => {
@@ -56,7 +68,7 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
         const data = await locationService.getUFs();
         setUfs(data);
       } catch (error) {
-        console.error('Error loading UFs:', error);
+        console.error("Error loading UFs:", error);
       }
     };
     loadUFs();
@@ -66,7 +78,7 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
     const loadCities = async () => {
       if (!selectedEstado) {
         setCities([]);
-        form.setValue('cidade', '');
+        form.setValue("cidade", "");
         return;
       }
 
@@ -76,7 +88,7 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
         const data = await locationService.getCitiesByUF(ufId);
         setCities(data);
       } catch (error) {
-        console.error('Error loading cities:', error);
+        console.error("Error loading cities:", error);
         setCities([]);
       } finally {
         setLoadingCities(false);
@@ -87,23 +99,23 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
 
   const handleSubmit = (data: FiltersFormData) => {
     const filters: AdotanteFilters = { ...data };
-    
+
     // Remove empty values
-    Object.keys(filters).forEach(key => {
+    Object.keys(filters).forEach((key) => {
       const value = filters[key as keyof AdotanteFilters];
-      if (value === '' || value === undefined) {
+      if (value === "" || value === undefined) {
         delete filters[key as keyof AdotanteFilters];
       }
     });
-    
+
     onApplyFilters(filters);
   };
 
   const handleClear = () => {
     form.reset({
       status: undefined,
-      cidade: '',
-      estado: '',
+      cidade: "",
+      estado: "",
       dataInicio: undefined,
       proximoContato: undefined,
     });
@@ -112,31 +124,33 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
   };
 
   const getActiveFiltersCount = () => {
-    return Object.values(activeFilters).filter(value => value !== undefined && value !== '').length;
+    return Object.values(activeFilters).filter(
+      (value) => value !== undefined && value !== ""
+    ).length;
   };
 
   const getFilterLabel = (key: string, value: any) => {
     const labels: Record<string, Record<string, string>> = {
       status: {
-        ativo: 'Ativo',
-        inativo: 'Inativo',
+        ativo: "Ativo",
+        inativo: "Inativo",
       },
     };
 
-    if (key === 'estado') {
-      const uf = ufs.find(u => u.id.toString() === value);
+    if (key === "estado") {
+      const uf = ufs.find((u) => u.id.toString() === value);
       return uf ? uf.acronym : value;
     }
 
-    if (key === 'cidade') {
-      const city = cities.find(c => c.id.toString() === value);
+    if (key === "cidade") {
+      const city = cities.find((c) => c.id.toString() === value);
       return city ? city.name : value;
     }
 
     if (labels[key] && labels[key][value]) {
       return labels[key][value];
     }
-    
+
     return value;
   };
 
@@ -148,14 +162,18 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
           Filtros de Busca
           {getActiveFiltersCount() > 0 && (
             <Badge variant="secondary" className="ml-2">
-              {getActiveFiltersCount()} ativo{getActiveFiltersCount() > 1 ? 's' : ''}
+              {getActiveFiltersCount()} ativo
+              {getActiveFiltersCount() > 1 ? "s" : ""}
             </Badge>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Basic Filters */}
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
               <FormField
@@ -211,20 +229,22 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cidade</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
+                    <Select
+                      onValueChange={field.onChange}
                       value={field.value}
                       disabled={!selectedEstado || loadingCities}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={
-                            !selectedEstado 
-                              ? "Selecione um estado primeiro" 
-                              : loadingCities 
-                              ? "Carregando..." 
-                              : "Selecione a cidade"
-                          } />
+                          <SelectValue
+                            placeholder={
+                              !selectedEstado
+                                ? "Selecione um estado primeiro"
+                                : loadingCities
+                                ? "Carregando..."
+                                : "Selecione a cidade"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -295,10 +315,14 @@ const AdotanteFiltersComponent: React.FC<AdotanteFiltersProps> = ({
           <div className="mt-4 pt-4 border-t border-border">
             <div className="flex flex-wrap gap-2">
               {Object.entries(activeFilters).map(([key, value]) => {
-                if (!value || value === '') return null;
-                
+                if (!value || value === "") return null;
+
                 return (
-                  <Badge key={key} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={key}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     {key}: {getFilterLabel(key, value)}
                     <Button
                       type="button"

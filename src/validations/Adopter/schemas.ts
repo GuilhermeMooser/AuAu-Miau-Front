@@ -61,3 +61,14 @@ export const adopterSchema = z.object({
   activeNotification: z.boolean(),
   animalsIds: z.array(z.string()).optional(),
 });
+
+
+/**NEW */
+
+export const adopterFiltersSchema = z.object({
+  status: z.enum(['active', 'inactive']).optional(),
+  city: z.string().optional(),
+  stateUf: z.string().optional(),
+  createdAt: z.date().optional(),
+  dtToNotify: z.date().optional(),
+})

@@ -19,6 +19,7 @@ import AdotantesPage from "./pages/adotantes/page";
 import Termos from "./pages/Termos";
 import NotFound from "./pages/NotFound";
 import queryClient from "./lib/queryClient";
+import Adopter from "./pages/adopter";
 
 
 
@@ -52,6 +53,12 @@ const App = () => (
             <Route path="/adotantes" element={
               <DashboardLayout>
                 <AdotantesPage />
+              </DashboardLayout>
+            } />
+
+            <Route path="/adotantesNew" element={
+              <DashboardLayout>
+                <Adopter />
               </DashboardLayout>
             } />
             

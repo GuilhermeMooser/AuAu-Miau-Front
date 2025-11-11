@@ -4,7 +4,10 @@ import { Term } from "./term";
 import { Audit } from "./audit";
 import { Pagination } from "./pagination";
 import z from "zod";
-import { adopterSchema } from "@/components/forms/Adopter/schemas";
+import {
+  adopterFiltersSchema,
+  adopterSchema,
+} from "@/validations/Adopter/schemas";
 
 type ContactType = "telefone" | "celular" | "whatsapp";
 
@@ -80,18 +83,13 @@ export type CreateAdopterDto = {
 
 export type AdotanteFormData = z.infer<typeof adopterSchema>;
 
-export type AdotanteFilters = {
-  status?: "ativo" | "inativo";
-  cidade?: string;
-  estado?: string;
-  profissao?: string;
-  estadoCivil?:
-    | "solteiro"
-    | "casado"
-    | "divorciado"
-    | "viuvo"
-    | "uniao_estavel";
-  dataInicio?: Date;
-  dataFim?: Date;
-  proximoContato?: Date;
+export type AdopterFilterFormData = z.infer<typeof adopterFiltersSchema>;
+
+/**Filters with Nome, CPF, Email + AdopterFilters*/
+export type AdopterFilters = {
+  status?: "active" | "inactive";
+  city?: string;
+  stateUf?: string;
+  createdAt?: Date;
+  dtToNotify?: Date;
 };

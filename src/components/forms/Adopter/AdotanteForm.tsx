@@ -55,9 +55,9 @@ import {
 } from "@/components/ui/popover";
 import { MaskedInput } from "@/components/ui/masked-input";
 import { cn } from "@/lib/utils";
-import { locationService, City, Uf } from "@/services/locationService";
+import { locationService, City, UF } from "@/services/locationService";
 import { Adopter, AdotanteFormData } from "@/types";
-import { adopterSchema } from "./schemas";
+import { adopterSchema } from "../../../validations/Adopter/schemas";
 import { useFieldArray, useForm } from "react-hook-form";
 import { formatDate } from "@/utils/formatDate";
 import { formatPhoneNumber } from "@/utils/format";
@@ -76,7 +76,7 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
   mode,
 }) => {
   // Location states
-  const [ufs, setUfs] = useState<Uf[]>([]);
+  const [ufs, setUfs] = useState<UF[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
   const [selectedUfId, setSelectedUfId] = useState<number | null>(null);
@@ -615,7 +615,10 @@ const AdopterForm: React.FC<AdopterFormProps> = ({
                                   placeholder={"(00) 00000-0000"}
                                 />
                               ) : (
-                                <Input defaultValue={formatPhoneNumber(field.value)} disabled={isReadOnly} />
+                                <Input
+                                  defaultValue={formatPhoneNumber(field.value)}
+                                  disabled={isReadOnly}
+                                />
                               )}
                             </FormControl>
                             <FormMessage />
