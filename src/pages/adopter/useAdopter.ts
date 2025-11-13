@@ -1,5 +1,5 @@
 import { useModal } from "@/hooks/useMobile";
-import { AdopterFilters } from "@/types";
+import { AdopterFilterFormData, AdopterFilters } from "@/types";
 import { useState } from "react";
 
 export const useAdopter = () => {
@@ -29,7 +29,16 @@ export const useAdopter = () => {
   const filtersCount = Object.values(activeFilters).filter(
     (v) => v !== undefined && v !== null && v !== ""
   ).length;
-  
+
+  const handleApplyFilter = (data: AdopterFilterFormData) => {
+    setActiveFilter(data);
+    //Fazer Request
+  };
+
+  const handleClearFilter = () => {
+    setActiveFilter({})
+  }
+
   return {
     isCreateModalOpen,
     searchTerm,
@@ -39,5 +48,7 @@ export const useAdopter = () => {
     handleOpenCreateModal,
     onToggleFilters,
     handleChangeFilter,
+    handleApplyFilter,
+    handleClearFilter,
   };
 };

@@ -26,9 +26,9 @@ function Calendar({
         caption_label: "hidden",
 
         caption_dropdowns:
-          "flex items-center justify-center gap-2 rounded-md bg-muted/40 px-8",
+          "flex items-center justify-center gap-2 rounded-md bg-muted/40 px-8 py-1",
         dropdown:
-          "border border-input bg-background rounded-md px-3 py-1 text-sm font-medium text-foreground cursor-pointer hover:bg-primary hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-colors",
+          "border border-input bg-background rounded-md px-1 py-1 text-sm font-medium text-foreground cursor-pointer hover:bg-primary hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-colors",
 
         // Botões de navegação – lado a lado, alinhados verticalmente ao centro
         nav: "absolute inset-0 flex items-center justify-between px-1 pointer-events-none",

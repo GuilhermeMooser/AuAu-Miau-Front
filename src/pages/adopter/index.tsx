@@ -13,6 +13,8 @@ export default function Adopter() {
     handleOpenCreateModal,
     onToggleFilters,
     handleChangeFilter,
+    handleApplyFilter,
+    handleClearFilter,
   } = useAdopter();
 
   return (
@@ -29,6 +31,8 @@ export default function Adopter() {
         isOpen={showFilters}
         activeFilters={activeFilters}
         filtersCount={filtersCount}
+        handleApplyFilter={handleApplyFilter}
+        handleClearFilter={handleClearFilter}
       />
     </div>
   );

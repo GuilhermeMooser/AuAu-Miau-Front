@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Filter, Search, X } from "lucide-react";
 import { useAdopterFilterModal } from "./useAdopterFilterModal";
-import { AdopterFilters } from "@/types";
+import { AdopterFilterFormData, AdopterFilters } from "@/types";
 import {
   Select,
   SelectContent,
@@ -23,12 +23,16 @@ import { Button } from "@/components/ui/button";
 type AdopterFilterModalProps = {
   isOpen: boolean;
   activeFilters: AdopterFilters;
+  handleApplyFilter: (data: AdopterFilterFormData) => void;
+  handleClearFilter: () => void;
   filtersCount?: number;
 };
 
 export default function AdopterFilterModal({
   isOpen,
   activeFilters,
+  handleApplyFilter,
+  handleClearFilter,
   filtersCount = 0,
 }: AdopterFilterModalProps) {
   const {
@@ -38,7 +42,6 @@ export default function AdopterFilterModal({
     isLoadingCities,
     selectedState,
     handleClear,
-    handleApplyFilter,
   } = useAdopterFilterModal({
     activeFilters,
   });
@@ -174,7 +177,14 @@ export default function AdopterFilterModal({
                 )}
               />
               <div className="flex items-end gap-x-2 justify-end">
-                <Button type="button" variant="outline" onClick={handleClear}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    handleClear();
+                    handleClearFilter();
+                  }}
+                >
                   <X className="h-4 w-4" />
                   Limpar Filtros
                 </Button>

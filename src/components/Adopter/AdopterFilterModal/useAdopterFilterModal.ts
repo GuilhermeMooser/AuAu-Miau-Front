@@ -51,18 +51,13 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
 
   const handleClear = () => {
     form.reset({
-      status: undefined,
+      status: "",
       city: "",
       stateUf: "",
       createdAt: undefined,
       dtToNotify: undefined,
     });
   };
-
-
-  const handleApplyFilter = (data: AdopterFilterFormData) => {
-    console.log(data)
-  }
 
   return {
     form,
@@ -71,6 +66,5 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
     statesData,
     citiesData,
     handleClear,
-    handleApplyFilter
   };
 };
