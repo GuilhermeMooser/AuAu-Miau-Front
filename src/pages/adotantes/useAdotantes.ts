@@ -5,7 +5,6 @@ import {
   Adopter,
   AdopterAddress,
   AdopterContact,
-  AdotanteFilters,
   CreateAdopterDto,
   MinimalAdopter,
 } from "../../types";
