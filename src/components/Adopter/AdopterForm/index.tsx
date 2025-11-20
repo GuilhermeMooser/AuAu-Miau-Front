@@ -61,6 +61,7 @@ export default function AdopterForm({
     prState,
     citiesData,
     submitting,
+    onError,
     handleCloseModal,
     handleButtonConfirm,
     handleStateChange,
@@ -535,66 +536,84 @@ export default function AdopterForm({
                         )}
                       />
 
-                      <FormItem>
-                        <FormLabel>Estado</FormLabel>
-                        <Select
-                          onValueChange={(value) =>
-                            handleStateChange(index, value)
-                          }
-                          value={
-                            currentStateId > 0
-                              ? currentStateId.toString()
-                              : undefined
-                          }
-                          disabled={isReadOnly || loadingLocations}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {statesData?.map((uf) => (
-                              <SelectItem key={uf.id} value={uf.id.toString()}>
-                                {uf.acronym} - {uf.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
+                      <FormField
+                        control={form.control}
+                        name={`addresses.${index}.city.stateUf.id`}
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Estado</FormLabel>
+                            <Select
+                              onValueChange={(value) =>
+                                handleStateChange(index, value)
+                              }
+                              value={
+                                currentStateId > 0
+                                  ? currentStateId.toString()
+                                  : undefined
+                              }
+                              disabled={isReadOnly || loadingLocations}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {statesData?.map((uf) => (
+                                  <SelectItem
+                                    key={uf.id}
+                                    value={uf.id.toString()}
+                                  >
+                                    {uf.acronym} - {uf.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
 
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Cidade</FormLabel>
-                        <Select
-                          onValueChange={(value) =>
-                            handleCityChange(index, value)
-                          }
-                          value={
-                            currentCityId > 0
-                              ? currentCityId.toString()
-                              : undefined
-                          }
-                          disabled={
-                            isReadOnly || loadingLocations || !currentStateId
-                          }
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione a cidade" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {citiesData?.map((city) => (
-                              <SelectItem
-                                key={city.id}
-                                value={city.id.toString()}
-                              >
-                                {city.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
+                      <FormField
+                        control={form.control}
+                        name={`addresses.${index}.city.id`}
+                        render={() => (
+                          <FormItem className="md:col-span-2">
+                            <FormLabel>Cidade</FormLabel>
+                            <Select
+                              onValueChange={(value) =>
+                                handleCityChange(index, value)
+                              }
+                              value={
+                                currentCityId > 0
+                                  ? currentCityId.toString()
+                                  : undefined
+                              }
+                              disabled={
+                                isReadOnly ||
+                                loadingLocations ||
+                                !currentStateId
+                              }
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione a cidade" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {citiesData?.map((city) => (
+                                  <SelectItem
+                                    key={city.id}
+                                    value={city.id.toString()}
+                                  >
+                                    {city.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -631,7 +650,7 @@ export default function AdopterForm({
           {isReadOnly ? "Fechar" : "Cancelar"}
         </Button>
         {!isReadOnly && (
-          <Button onClick={form.handleSubmit(handleButtonConfirm)}>
+          <Button onClick={form.handleSubmit(handleButtonConfirm, onError)}>
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

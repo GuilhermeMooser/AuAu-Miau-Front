@@ -1,12 +1,19 @@
 import { AdopterFormData } from "@/types";
 import { adopterSchema } from "@/validations/Adopter/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm } from "react-hook-form";
+import {
+  FieldError,
+  FieldErrors,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import { AdopterFormProps } from ".";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cityCache, stateUfCache } from "@/constants/cacheNames";
 import { locationService } from "@/services/locationService";
+import { toast } from "@/hooks/use-toast";
+import { useFormError } from "@/hooks/useFormError";
 
 type Props = {
   adopter: AdopterFormProps["adopter"];
@@ -32,6 +39,8 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       contacts: [],
     },
   });
+  
+  const { onError } = useFormError<AdopterFormData>();
 
   const activeNotificationWatcher = form.watch("activeNotification");
   const isReadOnly = mode === "view";
@@ -51,7 +60,19 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     if (contacts?.length > 0 && !contacts.some((c) => c.isPrincipal)) {
       form.setValue("contacts.0.isPrincipal", true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contatosFields.length]);
+
+  useEffect(() => {
+    if (mode === "create" && contatosFields.length === 0) {
+      appendContato({
+        type: "celular",
+        value: "",
+        isPrincipal: true,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   const getContactMask = (index: number) => {
     const type = form.watch(`contacts.${index}.type`);
@@ -100,6 +121,29 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
 
   const prState = statesData.find((uf) => uf.acronym === "PR");
   const prUfId = prState?.id;
+
+  useEffect(() => {
+    if (mode === "create" && prState && enderecosFields.length === 0) {
+      appendEndereco(
+        {
+          street: "",
+          neighborhood: "",
+          number: undefined,
+          city: {
+            id: 0,
+            name: "",
+            stateUf: {
+              id: prState.id,
+              name: prState.name,
+              acronym: prState.acronym,
+            },
+          },
+        },
+        { shouldFocus: false }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prState, mode]);
 
   const selectedStateId = form.watch("addresses.0.city.stateUf.id") || prUfId;
 
@@ -165,6 +209,7 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     isLoadingCities,
     prUfId,
     prState,
+    onError,
     appendContato,
     removeContato,
     getContactMask,

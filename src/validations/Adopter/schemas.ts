@@ -52,13 +52,7 @@ export const adopterSchema = z.object({
 
   addresses: z
     .array(addressSchema)
-    .min(1, "Pelo menos um endereço é obrigatório")
-    .refine(
-      (addresses) => {
-        return addresses.every((addr) => addr.number && addr.number > 0);
-      },
-      { message: "O número do endereço é obrigatório" }
-    ),
+    .min(1, "Pelo menos um endereço é obrigatório"),
 
   dtToNotify: z.date().nullable().optional(),
   activeNotification: z.boolean().optional(),
