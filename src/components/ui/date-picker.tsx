@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/popover";
 
 interface DatePickerProps {
-  date?: Date;
+  date?: Date | null;
   onDateChange: (date: Date | undefined) => void;
   placeholder?: string;
   disabled?: boolean;
@@ -51,7 +51,7 @@ export function DatePicker({
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
-          selected={date}
+          selected={date ? date : undefined}
           onSelect={onDateChange}
           initialFocus
           locale={ptBR}

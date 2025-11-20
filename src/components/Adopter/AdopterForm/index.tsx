@@ -142,6 +142,7 @@ export default function AdopterForm({
                       placeholder="Selecione a data"
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -216,29 +217,31 @@ export default function AdopterForm({
             />
           </div>
 
-          {activeNotificationWatcher && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-              <FormField
-                control={form.control}
-                name="dtToNotify"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Data do próximo contato</FormLabel>
-                    <FormControl className="bg-[#020817]">
-                      <DatePicker
-                        disabled={isReadOnly || !activeNotificationWatcher}
-                        date={field.value}
-                        disablePastDates
-                        onDateChange={field.onChange}
-                        placeholder="Selecione a data para próximo contato"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          )}
+          <div
+            className={`grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg ${
+              !activeNotificationWatcher ? "hidden" : ""
+            }`}
+          >
+            <FormField
+              control={form.control}
+              name="dtToNotify"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Data do próximo contato</FormLabel>
+                  <FormControl className="bg-[#020817]">
+                    <DatePicker
+                      disabled={isReadOnly || !activeNotificationWatcher}
+                      date={field.value ?? null}
+                      disablePastDates
+                      onDateChange={field.onChange}
+                      placeholder="Selecione a data para próximo contato"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}

@@ -9,9 +9,9 @@ import { cityCache, stateUfCache } from "@/constants/cacheNames";
 import { locationService } from "@/services/locationService";
 
 type Props = {
-  adopter: AdopterFormProps["adopter"]
+  adopter: AdopterFormProps["adopter"];
   mode: AdopterFormProps["mode"];
-  onCancel:  AdopterFormProps["onCancel"];
+  onCancel: AdopterFormProps["onCancel"];
 };
 
 export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
@@ -24,7 +24,10 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       dtOfBirth: undefined,
       rg: "",
       cpf: "",
-      activeNotification: undefined,
+      activeNotification: false,
+      profession: "",
+      civilState: undefined,
+      dtToNotify: null,
       addresses: [],
       contacts: [],
     },
@@ -136,17 +139,17 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
   const loadingLocations = isLoadingStates || isLoadingCities;
 
   /**Actions */
-  const [submitting, setSubmitting] = useState<boolean>(false)
+  const [submitting, setSubmitting] = useState<boolean>(false);
   const handleButtonConfirm = (data: AdopterFormData) => {
-    console.log(data)
-    setSubmitting(true)
+    console.log(data);
+    setSubmitting(true);
   };
 
   const handleCloseModal = () => {
-    console.log('awdawdawd')
-    onCancel()
-    form.reset()
-  }
+    console.log("awdawdawd");
+    onCancel();
+    form.reset();
+  };
 
   return {
     form,
