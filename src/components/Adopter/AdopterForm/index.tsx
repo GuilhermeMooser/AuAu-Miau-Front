@@ -14,10 +14,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Bell, BellOff, MapPin, Phone, Plus, Trash2, User } from "lucide-react";
-import { Adopter, AdopterFormData } from "@/types";
+import {
+  Bell,
+  BellOff,
+  Loader2,
+  MapPin,
+  Phone,
+  Plus,
+  Trash2,
+  User,
+} from "lucide-react";
+import { Adopter } from "@/types";
 import { Input } from "@/components/ui/input";
-import { formatDate } from "@/utils/formatDate";
 import { DatePicker } from "@/components/ui/date-picker";
 import { MaskedInput } from "@/components/ui/masked-input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,11 +38,9 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatPhoneNumber } from "@/utils/format";
 
 export type AdopterFormProps = {
   adopter?: Adopter;
-  onSubmit: (data: AdopterFormData) => void; //TODO
   onCancel: () => void;
   mode: "create" | "edit" | "view";
 };
@@ -43,7 +49,6 @@ export default function AdopterForm({
   adopter,
   mode,
   onCancel,
-  onSubmit,
 }: AdopterFormProps) {
   const {
     form,
@@ -51,6 +56,15 @@ export default function AdopterForm({
     activeNotificationWatcher,
     contatosFields,
     enderecosFields,
+    statesData,
+    loadingLocations,
+    prState,
+    citiesData,
+    submitting,
+    handleCloseModal,
+    handleButtonConfirm,
+    handleStateChange,
+    handleCityChange,
     getCurrentStateUfId,
     getCurrentCityId,
     appendEndereco,
@@ -61,7 +75,9 @@ export default function AdopterForm({
     handlePrincipalChange,
     canSetPrincipal,
   } = useAdopterForm({
+    adopter,
     mode,
+    onCancel,
   });
 
   return (
@@ -460,7 +476,11 @@ export default function AdopterForm({
                             <FormItem>
                               <FormLabel>Rua</FormLabel>
                               <FormControl>
-                                <Input {...field} disabled={isReadOnly} />
+                                <Input
+                                  {...field}
+                                  disabled={isReadOnly}
+                                  placeholder="Ex: R. Capitão Frederico"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -476,16 +496,15 @@ export default function AdopterForm({
                             <FormControl>
                               <Input
                                 {...field}
-                                value={field.value || ""} // MUDANÇA: converte undefined/null para string vazia
+                                value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  // Se vazio, passa undefined, senão passa o valor
                                   field.onChange(
                                     value === "" ? undefined : Number(value)
                                   );
                                 }}
                                 disabled={isReadOnly}
-                                type="number" // mantém como number para validação do browser
+                                type="number"
                                 placeholder="Ex: 123"
                               />
                             </FormControl>
@@ -502,34 +521,28 @@ export default function AdopterForm({
                           <FormItem>
                             <FormLabel>Bairro</FormLabel>
                             <FormControl>
-                              <Input {...field} disabled={isReadOnly} />
+                              <Input
+                                {...field}
+                                disabled={isReadOnly}
+                                placeholder="Ex: Centro"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
                         <Select
-                          onValueChange={(value) => {
-                            const selectedUf = ufs.find(
-                              (uf) => uf.id === Number(value)
-                            );
-                            if (selectedUf) {
-                              // Update city object with new state
-                              form.setValue(`addresses.${index}.city.stateUf`, {
-                                id: selectedUf.id,
-                                name: selectedUf.name,
-                                acronym: selectedUf.acronym,
-                              });
-                              // Clear city selection
-                              form.setValue(`addresses.${index}.city.id`, 0);
-                              form.setValue(`addresses.${index}.city.name`, "");
-                              // Load cities for the selected state
-                              loadCitiesByUF(Number(value));
-                            }
-                          }}
-                          value={currentStateId?.toString()}
+                          onValueChange={(value) =>
+                            handleStateChange(index, value)
+                          }
+                          value={
+                            currentStateId > 0
+                              ? currentStateId.toString()
+                              : undefined
+                          }
                           disabled={isReadOnly || loadingLocations}
                         >
                           <FormControl>
@@ -538,7 +551,7 @@ export default function AdopterForm({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ufs.map((uf) => (
+                            {statesData?.map((uf) => (
                               <SelectItem key={uf.id} value={uf.id.toString()}>
                                 {uf.acronym} - {uf.name}
                               </SelectItem>
@@ -546,23 +559,13 @@ export default function AdopterForm({
                           </SelectContent>
                         </Select>
                       </FormItem>
+
                       <FormItem className="md:col-span-2">
                         <FormLabel>Cidade</FormLabel>
                         <Select
-                          onValueChange={(value) => {
-                            const selectedCity = cities.find(
-                              (c) => c.id === Number(value)
-                            );
-                            if (selectedCity) {
-                              // Atualiza o objeto city completo
-                              form.setValue(
-                                `addresses.${index}.city`,
-                                selectedCity,
-                                { shouldValidate: true } // ADIÇÃO: força validação
-                              );
-                            }
-                          }}
-                          // MUDANÇA: usar value condicional e não usar '0' como fallback
+                          onValueChange={(value) =>
+                            handleCityChange(index, value)
+                          }
                           value={
                             currentCityId > 0
                               ? currentCityId.toString()
@@ -574,22 +577,18 @@ export default function AdopterForm({
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
+                              <SelectValue placeholder="Selecione a cidade" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {cities
-                              ?.filter(
-                                (city) => city.stateUf.id === currentStateId
-                              )
-                              ?.map((city) => (
-                                <SelectItem
-                                  key={city.id}
-                                  value={city.id.toString()}
-                                >
-                                  {city.name}
-                                </SelectItem>
-                              ))}
+                            {citiesData?.map((city) => (
+                              <SelectItem
+                                key={city.id}
+                                value={city.id.toString()}
+                              >
+                                {city.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -599,6 +598,7 @@ export default function AdopterForm({
               </Card>
             );
           })}
+
           {!isReadOnly && (
             <Button
               type="button"
@@ -607,15 +607,11 @@ export default function AdopterForm({
                 appendEndereco({
                   street: "",
                   neighborhood: "",
-                  number: undefined, // MUDANÇA: undefined ao invés de 0
+                  number: undefined,
                   city: {
                     id: 0,
                     name: "",
-                    stateUf: {
-                      id: prUfId || 0,
-                      name: "Paraná",
-                      acronym: "PR",
-                    },
+                    stateUf: prState || { id: 0, name: "", acronym: "" },
                   },
                 })
               }
@@ -627,6 +623,23 @@ export default function AdopterForm({
           )}
         </CardContent>
       </Card>
+      <div className="flex justify-end space-x-4">
+        <Button type="button" variant="outline" onClick={handleCloseModal}>
+          {isReadOnly ? "Fechar" : "Cancelar"}
+        </Button>
+        {!isReadOnly && (
+          <Button onClick={form.handleSubmit(handleButtonConfirm)}>
+            {submitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {mode === "edit" ? "Atualizando..." : "Cadastrando..."}
+              </>
+            ) : (
+              <>{mode === "edit" ? "Atualizar" : "Cadastrar"}</>
+            )}
+          </Button>
+        )}
+      </div>
     </Form>
   );
 }

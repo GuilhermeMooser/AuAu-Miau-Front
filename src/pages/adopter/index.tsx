@@ -93,8 +93,6 @@ export default function Adopter() {
             </DialogHeader>
             <AdopterForm
               mode="create"
-              // onSubmit={handleCreateAdotante}
-              onSubmit={() => {}}
               onCancel={handleCloseCreateModalFn}
             />
           </DialogContent>

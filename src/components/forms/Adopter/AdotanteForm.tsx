@@ -56,7 +56,7 @@ import {
 import { MaskedInput } from "@/components/ui/masked-input";
 import { cn } from "@/lib/utils";
 import { locationService, City, UF } from "@/services/locationService";
-import { Adopter, AdotanteFormData } from "@/types";
+import { Adopter } from "@/types";
 import { adopterSchema } from "../../../validations/Adopter/schemas";
 import { useFieldArray, useForm } from "react-hook-form";
 import { formatDate } from "@/utils/formatDate";
