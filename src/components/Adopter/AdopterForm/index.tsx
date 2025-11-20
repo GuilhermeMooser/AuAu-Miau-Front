@@ -227,7 +227,7 @@ export default function AdopterForm({
               control={form.control}
               name="dtToNotify"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem id="dtToNotify" className="flex flex-col">
                   <FormLabel>Data do próximo contato</FormLabel>
                   <FormControl className="bg-[#020817]">
                     <DatePicker
@@ -574,6 +574,7 @@ export default function AdopterForm({
                       />
 
                       <FormField
+                        key={`city-${index}-${currentStateId}`}
                         control={form.control}
                         name={`addresses.${index}.city.id`}
                         render={() => (

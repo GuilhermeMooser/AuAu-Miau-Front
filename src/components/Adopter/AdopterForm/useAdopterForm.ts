@@ -39,7 +39,7 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       contacts: [],
     },
   });
-  
+
   const { onError } = useFormError<AdopterFormData>();
 
   const activeNotificationWatcher = form.watch("activeNotification");
@@ -148,7 +148,7 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
   const selectedStateId = form.watch("addresses.0.city.stateUf.id") || prUfId;
 
   const { data: citiesData = [], isLoading: isLoadingCities } = useQuery({
-    queryKey: [cityCache, selectedStateId],
+    queryKey: [`${cityCache}-${selectedStateId}`],
     queryFn: () => locationService.getCitiesByUF(selectedStateId!),
     enabled: !!selectedStateId,
   });
@@ -185,6 +185,12 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
   /**Actions */
   const [submitting, setSubmitting] = useState<boolean>(false);
   const handleButtonConfirm = (data: AdopterFormData) => {
+    if (data.activeNotification && !data.dtToNotify) {
+      verifyNotificationConfig(data);
+      return;
+    }
+
+    verifyNotificationConfig(data);
     console.log(data);
     setSubmitting(true);
   };
@@ -193,6 +199,27 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     console.log("awdawdawd");
     onCancel();
     form.reset();
+  };
+
+  const verifyNotificationConfig = (data: AdopterFormData) => {
+    if (data.activeNotification && !data.dtToNotify) {
+      form.setError("dtToNotify", {
+        type: "manual",
+        message:
+          "Data de notificação é obrigatória quando notificações estão ativas",
+      });
+
+      toast({
+        title: "Verifique os campos",
+        description:
+          "Data de notificação é obrigatória quando notificações estão ativas",
+        variant: "destructive",
+      });
+      document.getElementById("dtToNotify")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
   };
 
   return {

@@ -66,6 +66,17 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
     },
   });
 
+  useQueryError({
+    error: errorCitiesFetch,
+    setErrorMessage,
+    clearErrorMessage: clearError,
+    statusHandlers: [
+      ...GLOBAL_ERROR_HANDLERS,
+      { statusCode: 401, message: "Acesso não autorizado." },
+      { statusCode: 404, message: "Os estados não foram encontrados." },
+    ],
+  });
+
   useEffect(() => {
     form.setValue("city", "");
   }, [selectedState, form]);
