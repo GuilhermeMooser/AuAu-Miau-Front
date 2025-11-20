@@ -1,4 +1,7 @@
 import { cityCache, stateUfCache } from "@/constants/cacheNames";
+import { GLOBAL_ERROR_HANDLERS } from "@/constants/errorHandlers";
+import { useError } from "@/hooks/useError";
+import { useQueryError } from "@/hooks/useQueryError";
 import { locationService } from "@/services/locationService";
 import { AdopterFilterFormData, AdopterFilters } from "@/types";
 import { adopterFiltersSchema } from "@/validations/Adopter/schemas";
@@ -12,6 +15,12 @@ type Props = {
 };
 
 export const useAdopterFilterModal = ({ activeFilters }: Props) => {
+  const {
+    setErrorMessage,
+    clearError,
+    errorMessage,
+  } = useError();
+
   const form = useForm<AdopterFilterFormData>({
     resolver: zodResolver(adopterFiltersSchema),
     defaultValues: {
@@ -25,9 +34,23 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
 
   const selectedState = form.watch("stateUf");
 
-  const { data: statesData, error: errorStatesFetch } = useQuery({
+  const {
+    data: statesData,
+    error: errorStatesFetch,
+  } = useQuery({
     queryKey: [stateUfCache],
     queryFn: async () => await locationService.getUFs(),
+  });
+
+  useQueryError({
+    error: errorStatesFetch,
+    setErrorMessage,
+    clearErrorMessage: clearError,
+    statusHandlers: [
+      ...GLOBAL_ERROR_HANDLERS,
+      { statusCode: 401, message: "Acesso não autorizado." },
+      { statusCode: 404, message: "Os estados não foram encontrados." },
+    ],
   });
 
   const {
@@ -47,8 +70,6 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
     form.setValue("city", "");
   }, [selectedState, form]);
 
-  //TODO userQueryError
-
   const handleClear = () => {
     form.reset({
       status: "",
@@ -65,6 +86,8 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
     selectedState,
     statesData,
     citiesData,
+    errorMessage,
+    clearError,
     handleClear,
   };
 };
