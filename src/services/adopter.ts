@@ -3,6 +3,7 @@ import {
   AdopterFilters,
   CreateAdopterDto,
   FindAllAdoptersPaginated,
+  UpdateAdopterDto,
 } from "@/types/adopter";
 import { addSearchParamsInUrl } from "@/utils/generatedPaginatedUrl";
 import { api } from "./api";
@@ -40,5 +41,14 @@ export const createAdopter = async (createAdopterDto: CreateAdopterDto) => {
   };
 
   const response = await api.post<Adopter>("/api/adopter/v1", body);
+  return response;
+};
+
+export const updateAdopter = async (updateAdopterDto: UpdateAdopterDto) => {
+  const body = {
+    ...updateAdopterDto,
+  };
+
+  const response = await api.put<Adopter>("/api/adopter/v1", body);
   return response;
 };

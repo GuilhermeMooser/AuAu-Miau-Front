@@ -98,22 +98,35 @@ export default function Adopter() {
           </DialogContent>
         </Dialog>
         {/* Edit Modal */}
-        {/* <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <Dialog open={isEditModalOpen} onOpenChange={handleCloseEditModalFn}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
             <DialogHeader>
               <DialogTitle>Editar Adotante</DialogTitle>
             </DialogHeader>
-            <AdotanteForm
+            <AdopterForm
               mode="edit"
-              adopter={selectedAdotante}
-              onSubmit={handleEditAdotante}
-              onCancel={() => {
-                setShowEditModal(false);
-                setSelectedAdotante(undefined);
-              }}
+              adopter={selectedAdopter}
+              onCancel={handleCloseEditModalFn}
             />
           </DialogContent>
-        </Dialog> */}
+        </Dialog>
+        {/* View Modal */}
+      {/* <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Adotante</DialogTitle>
+          </DialogHeader>
+          <AdotanteForm
+            mode="view"
+            adopter={selectedAdotante}
+            onSubmit={() => {}}
+            onCancel={() => {
+              setShowViewModal(false);
+              setSelectedAdotante(undefined);
+            }}
+          />
+        </DialogContent>
+      </Dialog> */}
       </div>
 
       {/* <Alert

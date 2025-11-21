@@ -1,4 +1,4 @@
-import { AdopterFormData, CreateAdopterDto } from "@/types";
+import { AdopterFormData, CreateAdopterDto, UpdateAdopterDto } from "@/types";
 import { adopterSchema } from "@/validations/Adopter/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -9,7 +9,7 @@ import { adoptersCache, cityCache, stateUfCache } from "@/constants/cacheNames";
 import { locationService } from "@/services/locationService";
 import { toast } from "@/hooks/use-toast";
 import { useFormError } from "@/hooks/useFormError";
-import { createAdopter } from "@/services/adopter";
+import { createAdopter, updateAdopter } from "@/services/adopter";
 import { useQueryCache } from "@/hooks/useQueryCache";
 import { mutationErrorHandling } from "@/utils/errorHandling";
 import { useError } from "@/hooks/useError";
@@ -21,21 +21,22 @@ type Props = {
 };
 
 export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
-  /** Form */ //TODO COLOCAR OS COLEASNCE PRO EDIT adopter.bla || ""
+  console.log(adopter);
+  /** Form */
   const form = useForm<AdopterFormData>({
     resolver: zodResolver(adopterSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      dtOfBirth: undefined,
-      rg: "",
-      cpf: "",
-      activeNotification: false,
-      profession: "",
-      civilState: undefined,
-      dtToNotify: null,
-      addresses: [],
-      contacts: [],
+      name: adopter?.name || "",
+      email: adopter?.email || "",
+      dtOfBirth: adopter?.dtOfBirth ? new Date(adopter.dtOfBirth) : undefined,
+      rg: adopter?.rg || "",
+      cpf: adopter?.cpf || "",
+      activeNotification: adopter?.activeNotification || false,
+      profession: adopter?.profession || "",
+      civilState: adopter?.civilState || undefined,
+      dtToNotify: adopter?.dtToNotify ? new Date(adopter.dtToNotify) : null,
+      addresses: adopter?.addresses || [],
+      contacts: adopter?.contacts || [],
     },
   });
 
@@ -191,10 +192,19 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
 
     if (mode === "create") {
       createAdopterMutation(data);
-    }
-    // else if (mode === 'edit') {
+    } else if (mode === "edit") {
 
-    // } else {
+      if (!adopter?.id) {
+        setErrorMessage("O código do adotante não pode ser nulo");
+        return;
+      }
+
+      updateAdopterMutation({
+        id: adopter.id,
+        ...data,
+      });
+    }
+    //  else {
     //   //mode === 'view'
     // }
 
@@ -208,7 +218,7 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
   };
 
   /**Query Cache */
-  const { addItemOnScreen } = useQueryCache();
+  const { addItemOnScreen, updateItemOnScreen } = useQueryCache();
 
   /**Mutations */
   const { mutate: createAdopterMutation } = useMutation({
@@ -232,6 +242,31 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       mutationErrorHandling(
         error,
         "Falha ao criar o adotante",
+        setErrorMessage
+      );
+    },
+  });
+
+  const { mutate: updateAdopterMutation } = useMutation({
+    mutationFn: async (updateAdopterDto: UpdateAdopterDto) => {
+      return (await updateAdopter({ ...updateAdopterDto })).data;
+    },
+
+    onSuccess: (data) => {
+      setSubmitting(false);
+      toast({
+        title: "Sucesso",
+        description: "Adotante atualizado com sucesso",
+        variant: "success",
+      });
+      updateItemOnScreen([adoptersCache], data);
+      handleCloseModal();
+    },
+    onError: (error) => {
+      setSubmitting(false);
+      mutationErrorHandling(
+        error,
+        "Falha ao atualizar o adotante",
         setErrorMessage
       );
     },

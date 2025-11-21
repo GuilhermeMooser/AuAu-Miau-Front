@@ -1,5 +1,5 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 
 type CacheItems<T> = {
   items: T[];
@@ -28,7 +28,36 @@ export const useQueryCache = () => {
     [queryClient]
   );
 
-  return { addItemOnScreen };
+  const updateItemOnScreen = useCallback(
+    <T extends { id: string | number }>(
+      cacheKey: unknown[],
+      data: T,
+      conditionFn?: (item: T, data: T) => boolean
+    ) => {
+      queryClient.setQueriesData<CacheItems<T>>(
+        { queryKey: cacheKey },
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            items: oldData.items.map((item) =>
+              conditionFn
+                ? conditionFn(item, data)
+                  ? data
+                  : item
+                : item.id === data.id
+                ? data
+                : item
+            ),
+          };
+        }
+      );
+    },
+    [queryClient]
+  );
+
+  return { addItemOnScreen, updateItemOnScreen };
 };
 
 //   const updateItemOnScreen = useCallback(

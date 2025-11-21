@@ -81,6 +81,10 @@ export type CreateAdopterDto = {
   animalsIds?: string[];
 };
 
+export type UpdateAdopterDto = CreateAdopterDto & {
+  id: string;
+};
+
 export type AdopterFormData = z.infer<typeof adopterSchema>;
 
 export type AdopterFilterFormData = z.infer<typeof adopterFiltersSchema>;

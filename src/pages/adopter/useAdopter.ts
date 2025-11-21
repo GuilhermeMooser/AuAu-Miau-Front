@@ -70,7 +70,7 @@ export const useAdopter = () => {
     queryFn: async () =>
       (await getAdoptersPaginated(searchTerm, activeFilters)).data,
   });
-//TODO USEQUERYERROR
+  //TODO USEQUERYERROR
   console.log(adoptersData);
 
   /** Functions and logics */
@@ -79,7 +79,6 @@ export const useAdopter = () => {
 
   const handleEditClick = (adopter: MinimalAdopter) => {
     getAdopterById(adopter.id);
-    handleOpenEditModal();
   };
 
   const { mutate: getAdopterById } = useMutation({
@@ -89,6 +88,7 @@ export const useAdopter = () => {
 
     onSuccess: (data) => {
       setSelectedAdopter(data);
+      handleOpenEditModal();
     },
     onError: (error) => {
       mutationErrorHandling(
