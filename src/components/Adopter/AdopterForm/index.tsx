@@ -142,6 +142,7 @@ export default function AdopterForm({
                     <FormLabel>Data de Nascimento</FormLabel>
                     <FormControl className="bg-[#020817]">
                       <DatePicker
+                        disabled={isReadOnly}
                         date={field.value}
                         onDateChange={field.onChange}
                         placeholder="Selecione a data"
