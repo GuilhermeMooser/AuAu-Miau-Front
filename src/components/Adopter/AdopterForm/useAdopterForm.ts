@@ -1,9 +1,4 @@
-import {
-  Adopter,
-  AdopterDto,
-  AdopterFormData,
-  CreateAdopterDto,
-} from "@/types";
+import { AdopterFormData, CreateAdopterDto } from "@/types";
 import { adopterSchema } from "@/validations/Adopter/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -229,7 +224,7 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       toast({
         title: "Sucesso",
         description: "Adotante criado com sucesso",
-        variant: "default",
+        variant: "success",
       });
       // addItemOnScreen([adoptersCache], data);
       handleCloseModal();
@@ -273,14 +268,6 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       });
     }
   };
-
-  useEffect(() => {
-    toast({
-      title: "Sucesso",
-      description: "Adotante criado com sucesso",
-      variant: "default",
-    });
-  }, []);
 
   return {
     form,
