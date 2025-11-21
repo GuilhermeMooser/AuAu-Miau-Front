@@ -70,7 +70,7 @@ export const useAdopter = () => {
     queryFn: async () =>
       (await getAdoptersPaginated(searchTerm, activeFilters)).data,
   });
-
+//TODO USEQUERYERROR
   console.log(adoptersData);
 
   /** Functions and logics */

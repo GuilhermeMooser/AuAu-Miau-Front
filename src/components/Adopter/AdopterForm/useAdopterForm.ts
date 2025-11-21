@@ -226,7 +226,7 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
         description: "Adotante criado com sucesso",
         variant: "success",
       });
-      // addItemOnScreen([adoptersCache], data);
+      addItemOnScreen([adoptersCache], data);
       handleCloseModal();
     },
     // onError: (error) => {

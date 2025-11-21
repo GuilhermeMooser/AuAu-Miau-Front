@@ -1,6 +1,5 @@
 import {
   Adopter,
-  AdopterDto,
   AdopterFilters,
   CreateAdopterDto,
   FindAllAdoptersPaginated,
