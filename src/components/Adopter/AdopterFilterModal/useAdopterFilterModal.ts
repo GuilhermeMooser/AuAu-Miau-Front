@@ -15,11 +15,7 @@ type Props = {
 };
 
 export const useAdopterFilterModal = ({ activeFilters }: Props) => {
-  const {
-    setErrorMessage,
-    clearError,
-    errorMessage,
-  } = useError();
+  const { setErrorMessage, clearError, errorMessage } = useError();
 
   const form = useForm<AdopterFilterFormData>({
     resolver: zodResolver(adopterFiltersSchema),
@@ -34,10 +30,7 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
 
   const selectedState = form.watch("stateUf");
 
-  const {
-    data: statesData,
-    error: errorStatesFetch,
-  } = useQuery({
+  const { data: statesData, error: errorStatesFetch } = useQuery({
     queryKey: [stateUfCache],
     queryFn: async () => await locationService.getUFs(),
   });

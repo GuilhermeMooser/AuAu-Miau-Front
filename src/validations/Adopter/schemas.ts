@@ -43,19 +43,16 @@ export const adopterSchema = z.object({
 
   profession: z.string().nonempty("Profissão é obrigatória"),
 
-  civilState: z
-    .enum(["solteiro", "casado", "divorciado", "viuvo", "uniao_estavel"])
-    .optional()
-    .refine((value) => value !== undefined, {
-      message: "Selecione um estado civil",
-    }),
-
+  civilState: z.enum(
+    ["solteiro", "casado", "divorciado", "viuvo", "uniao_estavel"],
+    { message: "Selecione um estado civil" }
+  ),
   addresses: z
     .array(addressSchema)
     .min(1, "Pelo menos um endereço é obrigatório"),
 
   dtToNotify: z.date().nullable().optional(),
-  activeNotification: z.boolean().optional(),
+  activeNotification: z.boolean(),
 
   animalsIds: z.array(z.string()).optional(),
 });

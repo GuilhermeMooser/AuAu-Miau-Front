@@ -1,4 +1,9 @@
-import { AdopterFormData } from "@/types";
+import {
+  Adopter,
+  AdopterDto,
+  AdopterFormData,
+  CreateAdopterDto,
+} from "@/types";
 import { adopterSchema } from "@/validations/Adopter/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -9,11 +14,13 @@ import {
 } from "react-hook-form";
 import { AdopterFormProps } from ".";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { cityCache, stateUfCache } from "@/constants/cacheNames";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { adoptersCache, cityCache, stateUfCache } from "@/constants/cacheNames";
 import { locationService } from "@/services/locationService";
 import { toast } from "@/hooks/use-toast";
 import { useFormError } from "@/hooks/useFormError";
+import { createAdopter } from "@/services/adopter";
+import { useQueryCache } from "@/hooks/useQueryCache";
 
 type Props = {
   adopter: AdopterFormProps["adopter"];
@@ -190,17 +197,62 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       return;
     }
 
-    verifyNotificationConfig(data);
+    if (mode === "create") {
+      createAdopterMutation(data);
+    }
+    // else if (mode === 'edit') {
+
+    // } else {
+    //   //mode === 'view'
+    // }
+
     console.log(data);
     setSubmitting(true);
   };
 
   const handleCloseModal = () => {
-    console.log("awdawdawd");
     onCancel();
     form.reset();
   };
 
+  /**Query Cache */
+  const { addItemOnScreen } = useQueryCache();
+
+  /**Mutations */
+  const { mutate: createAdopterMutation } = useMutation({
+    mutationFn: async (createAdopterDto: CreateAdopterDto) => {
+      return (await createAdopter(createAdopterDto)).data;
+    },
+
+    onSuccess: (data) => {
+      setSubmitting(false);
+      toast({
+        title: "Sucesso",
+        description: "Adotante criado com sucesso",
+        variant: "default",
+      });
+      // addItemOnScreen([adoptersCache], data);
+      handleCloseModal();
+    },
+    // onError: (error) => {
+    //   mutationErrorHandling(
+    //     error,
+    //     "Falha ao buscar adotante",
+    //     setErrorMessage,
+    //     () => {
+    //       if (
+    //         error instanceof AxiosError &&
+    //         error.response?.data.statusCode === 404
+    //       ) {
+    //         setErrorMessage("Adotante não encontrado");
+    //         return true;
+    //       }
+    //     }
+    //   );
+    // },
+  });
+
+  /**Technical Adjustment */
   const verifyNotificationConfig = (data: AdopterFormData) => {
     if (data.activeNotification && !data.dtToNotify) {
       form.setError("dtToNotify", {
@@ -221,6 +273,14 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       });
     }
   };
+
+  useEffect(() => {
+    toast({
+      title: "Sucesso",
+      description: "Adotante criado com sucesso",
+      variant: "default",
+    });
+  }, []);
 
   return {
     form,
