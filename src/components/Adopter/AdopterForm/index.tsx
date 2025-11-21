@@ -500,15 +500,18 @@ export default function AdopterForm({
                             <FormControl>
                               <Input
                                 {...field}
-                                value={field.value || ""}
+                                value={field.value ?? ""}
                                 onChange={(e) => {
-                                  const value = e.target.value;
+                                  const value = e.target.value.replace(
+                                    /\D/g,
+                                    ""
+                                  );
                                   field.onChange(
                                     value === "" ? undefined : Number(value)
                                   );
                                 }}
                                 disabled={isReadOnly}
-                                type="number"
+                                inputMode="numeric"
                                 placeholder="Ex: 123"
                               />
                             </FormControl>

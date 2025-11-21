@@ -11,10 +11,10 @@ const addressSchema = z.object({
   neighborhood: z.string().min(1, "Bairro é obrigatório"),
   number: z
     .number()
-    .int()
+    .int("Número deve ser inteiro")
     .positive("Número deve ser maior que zero")
     .optional()
-    .or(z.literal(0)),
+    .refine((val) => val !== undefined, { message: "Número é obrigatório" }),
   city: z.object({
     id: z.number().min(1, "Cidade é obrigatória"),
     name: z.string(),
