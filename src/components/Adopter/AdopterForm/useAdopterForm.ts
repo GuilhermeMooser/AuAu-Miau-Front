@@ -1,12 +1,7 @@
 import { AdopterFormData, CreateAdopterDto } from "@/types";
 import { adopterSchema } from "@/validations/Adopter/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  FieldError,
-  FieldErrors,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { AdopterFormProps } from ".";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -16,6 +11,8 @@ import { toast } from "@/hooks/use-toast";
 import { useFormError } from "@/hooks/useFormError";
 import { createAdopter } from "@/services/adopter";
 import { useQueryCache } from "@/hooks/useQueryCache";
+import { mutationErrorHandling } from "@/utils/errorHandling";
+import { useError } from "@/hooks/useError";
 
 type Props = {
   adopter: AdopterFormProps["adopter"];
@@ -43,7 +40,7 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
   });
 
   const { onError } = useFormError<AdopterFormData>();
-
+  const { clearError, errorMessage, setErrorMessage } = useError();
   const activeNotificationWatcher = form.watch("activeNotification");
   const isReadOnly = mode === "view";
 
@@ -229,22 +226,15 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
       addItemOnScreen([adoptersCache], data);
       handleCloseModal();
     },
-    // onError: (error) => {
-    //   mutationErrorHandling(
-    //     error,
-    //     "Falha ao buscar adotante",
-    //     setErrorMessage,
-    //     () => {
-    //       if (
-    //         error instanceof AxiosError &&
-    //         error.response?.data.statusCode === 404
-    //       ) {
-    //         setErrorMessage("Adotante não encontrado");
-    //         return true;
-    //       }
-    //     }
-    //   );
-    // },
+    onError: (error) => {
+      setSubmitting(false);
+      console.log(error);
+      mutationErrorHandling(
+        error,
+        "Falha ao criar o adotante",
+        setErrorMessage
+      );
+    },
   });
 
   /**Technical Adjustment */
@@ -283,6 +273,8 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     isLoadingCities,
     prUfId,
     prState,
+    errorMessage,
+    clearError,
     onError,
     appendContato,
     removeContato,

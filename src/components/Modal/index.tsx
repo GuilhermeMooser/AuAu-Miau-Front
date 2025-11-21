@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import clsx from "clsx";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,22 +20,22 @@ export default function Modal({
 }: ModalProps) {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 pointer-events-auto"
       onClick={onClose}
     >
-      {/* Conteúdo */}
       <div
         className={clsx(
-          "relative rounded-2xl shadow-lg",
+          "relative rounded-2xl shadow-lg pointer-events-auto",
           contentStyle
         )}
         style={{ width }}
-        onClick={(e) => e.stopPropagation()} // impede fechar ao clicar dentro
+        onClick={(e) => e.stopPropagation()}
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

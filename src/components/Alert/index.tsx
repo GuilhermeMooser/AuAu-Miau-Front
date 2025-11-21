@@ -13,9 +13,7 @@ interface AlertProps {
 
 export default function Alert({
   content,
-  icon = (
-    <Icon name="CircleAlert" className="text-zinc-500" fontSize="large" />
-  ),
+  icon = <Icon name="CircleAlert" className="text-zinc-500" fontSize="large" />,
   isOpen,
   className = "",
   onClose,
@@ -26,18 +24,23 @@ export default function Alert({
       isOpen={isOpen}
       onClose={onClose}
       width={width}
-      contentStyle={`rounded-md p-0 bg-background border-2 border-white/10 ${className}`}
+      contentStyle={`rounded-md z-[200] p-0 bg-background border-2 border-white/10 ${className}`}
     >
       <div className="w-full">
-        <div className="flex items-center gap-4 p-8">
+        <div className="flex flex-col items-center gap-4 p-8">
           {icon !== "none" && icon}
-          <span className="text-xs text-zinc-500 sm:text-lg">{content}</span>
+          <span className="text-xs text-white sm:text-lg">{content}</span>
         </div>
 
         <hr />
 
         <div className="p-4 pr-8 text-right text-primary">
-          <button onClick={onClose}>Fechar</button>
+          <button
+            onClick={onClose}
+            className="border-2 p-2 rounded-xl hover:bg-zinc-800 transition"
+          >
+            Fechar
+          </button>
         </div>
       </div>
     </Modal>
