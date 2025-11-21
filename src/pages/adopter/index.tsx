@@ -25,6 +25,9 @@ export default function Adopter() {
     errorMessage,
     isEditModalOpen,
     clearError,
+    isViewModalOpen,
+    handleCloseViewModalFn,
+    handleOpenViewModal,
     handleCloseCreateModalFn,
     handleCloseEditModalFn,
     handleOpenCreateModal,
@@ -33,6 +36,7 @@ export default function Adopter() {
     handleApplyFilter,
     handleClearFilter,
     handleEditClick,
+    handleViewClick,
   } = useAdopter();
 
   return (
@@ -60,7 +64,7 @@ export default function Adopter() {
               <AdopterCard
                 adopter={adopter}
                 handleEditClick={handleEditClick}
-                handleViewAdotante={() => {}}
+                handleViewAdotante={handleViewClick}
               />
             );
           })}
@@ -91,10 +95,7 @@ export default function Adopter() {
             <DialogHeader>
               <DialogTitle>Cadastrar Novo Adotante</DialogTitle>
             </DialogHeader>
-            <AdopterForm
-              mode="create"
-              onCancel={handleCloseCreateModalFn}
-            />
+            <AdopterForm mode="create" onCancel={handleCloseCreateModalFn} />
           </DialogContent>
         </Dialog>
         {/* Edit Modal */}
@@ -111,22 +112,18 @@ export default function Adopter() {
           </DialogContent>
         </Dialog>
         {/* View Modal */}
-      {/* <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
-          <DialogHeader>
-            <DialogTitle>Detalhes do Adotante</DialogTitle>
-          </DialogHeader>
-          <AdotanteForm
-            mode="view"
-            adopter={selectedAdotante}
-            onSubmit={() => {}}
-            onCancel={() => {
-              setShowViewModal(false);
-              setSelectedAdotante(undefined);
-            }}
-          />
-        </DialogContent>
-      </Dialog> */}
+        <Dialog open={isViewModalOpen} onOpenChange={handleCloseViewModalFn}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+            <DialogHeader>
+              <DialogTitle>Detalhes do Adotante</DialogTitle>
+            </DialogHeader>
+            <AdopterForm
+              mode="view"
+              adopter={selectedAdopter}
+              onCancel={handleCloseViewModalFn}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* <Alert

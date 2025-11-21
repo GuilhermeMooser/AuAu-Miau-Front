@@ -13,6 +13,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useState } from "react";
 
+type ModalAction = "edit" | "view";
+
 export const useAdopter = () => {
   const {
     isModalOpen: isCreateModalOpen,
@@ -31,10 +33,24 @@ export const useAdopter = () => {
     handleOpenModal: handleOpenEditModal,
   } = useModal();
 
+  const {
+    isModalOpen: isViewModalOpen,
+    handleCloseModal: handleCloseViewModal,
+    handleOpenModal: handleOpenViewModal,
+  } = useModal();
+
+  const [pendingAction, setPendingAction] = useState<ModalAction | null>(null);
   const handleCloseEditModalFn = () => {
+    setPendingAction(null)
     handleCloseEditModal();
     setSelectedAdopter(undefined);
   };
+
+  const handleCloseViewModalFn = () => {
+    setPendingAction(null)
+    handleCloseViewModal()
+    setSelectedAdopter(undefined);
+  }
 
   const { errorMessage, clearError, setErrorMessage } = useError();
 
@@ -78,6 +94,12 @@ export const useAdopter = () => {
   const [selectedAdopter, setSelectedAdopter] = useState<Adopter | undefined>();
 
   const handleEditClick = (adopter: MinimalAdopter) => {
+    setPendingAction("edit");
+    getAdopterById(adopter.id);
+  };
+
+  const handleViewClick = (adopter: MinimalAdopter) => {
+    setPendingAction("view");
     getAdopterById(adopter.id);
   };
 
@@ -88,7 +110,11 @@ export const useAdopter = () => {
 
     onSuccess: (data) => {
       setSelectedAdopter(data);
-      handleOpenEditModal();
+      if (pendingAction === "edit") {
+        handleOpenEditModal();
+      } else if (pendingAction === "view") {
+        handleOpenViewModal();
+      }
     },
     onError: (error) => {
       mutationErrorHandling(
@@ -118,6 +144,10 @@ export const useAdopter = () => {
     selectedAdopter,
     errorMessage,
     isEditModalOpen,
+    isViewModalOpen,
+    handleViewClick,
+    handleCloseViewModalFn,
+    handleOpenViewModal,
     handleCloseCreateModalFn,
     handleCloseEditModalFn,
     clearError,
