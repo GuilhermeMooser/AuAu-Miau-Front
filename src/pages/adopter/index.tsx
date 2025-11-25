@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import AdopterForm from "@/components/Adopter/AdopterForm";
+import Alert from "@/components/Alert";
 
 export default function Adopter() {
   const {
@@ -27,7 +28,6 @@ export default function Adopter() {
     clearError,
     isViewModalOpen,
     handleCloseViewModalFn,
-    handleOpenViewModal,
     handleCloseCreateModalFn,
     handleCloseEditModalFn,
     handleOpenCreateModal,
@@ -126,11 +126,11 @@ export default function Adopter() {
         </Dialog>
       </div>
 
-      {/* <Alert
+      <Alert
         content={errorMessage}
         isOpen={!!errorMessage}
         onClose={clearError}
-      /> */}
+      />
     </>
   );
 }

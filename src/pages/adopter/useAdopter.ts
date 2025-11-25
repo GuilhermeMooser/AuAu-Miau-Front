@@ -1,6 +1,8 @@
 import { adoptersCache } from "@/constants/cacheNames";
+import { GLOBAL_ERROR_HANDLERS } from "@/constants/errorHandlers";
 import { useError } from "@/hooks/useError";
 import { useModal } from "@/hooks/useModal";
+import { useQueryError } from "@/hooks/useQueryError";
 import { findAdopterById, getAdoptersPaginated } from "@/services/adopter";
 import {
   Adopter,
@@ -41,16 +43,16 @@ export const useAdopter = () => {
 
   const [pendingAction, setPendingAction] = useState<ModalAction | null>(null);
   const handleCloseEditModalFn = () => {
-    setPendingAction(null)
+    setPendingAction(null);
     handleCloseEditModal();
     setSelectedAdopter(undefined);
   };
 
   const handleCloseViewModalFn = () => {
-    setPendingAction(null)
-    handleCloseViewModal()
+    setPendingAction(null);
+    handleCloseViewModal();
     setSelectedAdopter(undefined);
-  }
+  };
 
   const { errorMessage, clearError, setErrorMessage } = useError();
 
@@ -86,8 +88,17 @@ export const useAdopter = () => {
     queryFn: async () =>
       (await getAdoptersPaginated(searchTerm, activeFilters)).data,
   });
-  //TODO USEQUERYERROR
-  console.log(adoptersData);
+
+  useQueryError({
+    error: errorAdoptersFetch,
+    setErrorMessage,
+    clearErrorMessage: clearError,
+    statusHandlers: [
+      ...GLOBAL_ERROR_HANDLERS,
+      { statusCode: 401, message: "Acesso não autorizado." },
+      { statusCode: 404, message: "Os adotantes não foram encontrados." },
+    ],
+  });
 
   /** Functions and logics */
 
@@ -147,7 +158,6 @@ export const useAdopter = () => {
     isViewModalOpen,
     handleViewClick,
     handleCloseViewModalFn,
-    handleOpenViewModal,
     handleCloseCreateModalFn,
     handleCloseEditModalFn,
     clearError,
