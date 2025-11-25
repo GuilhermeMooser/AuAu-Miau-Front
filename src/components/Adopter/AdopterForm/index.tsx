@@ -39,6 +39,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Alert from "@/components/Alert";
+import Icon from "@/components/Icon";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export type AdopterFormProps = {
   adopter?: Adopter;
@@ -63,6 +65,9 @@ export default function AdopterForm({
     citiesData,
     submitting,
     errorMessage,
+    isModalDeleteAdopterOpen,
+    canExcludeAdopter,
+    handleCloseDeleteAdopterModal,
     clearError,
     onError,
     handleCloseModal,
@@ -78,6 +83,8 @@ export default function AdopterForm({
     getContactMask,
     handlePrincipalChange,
     canSetPrincipal,
+    handleDeleteAdopter,
+    handleDeleteAdopterConfirm,
   } = useAdopterForm({
     adopter,
     mode,
@@ -89,9 +96,19 @@ export default function AdopterForm({
       <Form {...form}>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Informações Pessoais
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Informações Pessoais
+              </div>
+              {canExcludeAdopter && (
+                <div
+                  className="transition hover:text-red-500"
+                  onClick={handleDeleteAdopter}
+                >
+                  <Icon name="Trash2" />
+                </div>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -679,6 +696,14 @@ export default function AdopterForm({
         content={errorMessage}
         isOpen={!!errorMessage}
         onClose={clearError}
+      />
+
+      <ConfirmModal
+        isOpen={isModalDeleteAdopterOpen}
+        onClose={handleCloseDeleteAdopterModal}
+        onNotConfirm={handleCloseDeleteAdopterModal}
+        onConfirm={handleDeleteAdopterConfirm}
+        content={"Deseja excluir este adotante ?"}
       />
     </>
   );

@@ -57,66 +57,34 @@ export const useQueryCache = () => {
     [queryClient]
   );
 
-  return { addItemOnScreen, updateItemOnScreen };
+  const removeItemFromScreen = useCallback(
+    <T extends { id: string | number }>(
+      cacheKey: unknown[],
+      itemId: string | number,
+      conditionFn?: (item: T) => boolean
+    ) => {
+      queryClient.setQueriesData<CacheItems<T>>(
+        { queryKey: cacheKey, exact: false },
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            items: oldData.items.filter((item) =>
+              conditionFn ? !conditionFn(item) : item.id !== itemId
+            ),
+            meta: {
+              totalItems: oldData.meta.totalItems - 1,
+            },
+          };
+        }
+      );
+    },
+    [queryClient]
+  );
+
+  return { addItemOnScreen, updateItemOnScreen, removeItemFromScreen };
 };
-
-//   const updateItemOnScreen = useCallback(
-//     <Cache extends C>(
-//       cacheName: string,
-//       data: Cache['items'][number],
-//       conditionFn?: (
-//         item: Cache['items'][number],
-//         data: Cache['items'][number],
-//       ) => boolean,
-//     ) => {
-//       queryClient.setQueryData<Cache>(cacheName, (previousCache) => {
-//         if (previousCache) {
-//           const updatedCache: Cache = {
-//             ...previousCache,
-//             items: previousCache.items.map((item) => {
-//               if (conditionFn ? conditionFn(item, data) : item.id === data.id) {
-//                 item = data;
-//               }
-
-//               return item;
-//             }),
-//           };
-
-//           return updatedCache;
-//         }
-
-//         return previousCache!;
-//       });
-//     },
-//     [queryClient],
-//   );
-
-//   const removeItemFromScreen = useCallback(
-//     <Cache extends C>(
-//       cacheName: string,
-//       itemId: number | null,
-//       conditionFn?: (item: Cache['items'][number]) => boolean,
-//     ) => {
-//       queryClient.setQueryData<Cache>(cacheName, (previousCache) => {
-//         if (previousCache) {
-//           const filteredCache = previousCache?.items.filter((item) =>
-//             conditionFn ? conditionFn(item) : item.id !== itemId,
-//           );
-
-//           return {
-//             ...previousCache,
-//             items: filteredCache,
-//             meta: {
-//               totalItems: previousCache.meta.totalItems - 1,
-//             },
-//           };
-//         }
-
-//         return previousCache!;
-//       });
-//     },
-//     [queryClient],
-//   );
 
 //   const overrideCache = useCallback(
 //     <Cache>(cacheName: string, newCache: Cache) => {

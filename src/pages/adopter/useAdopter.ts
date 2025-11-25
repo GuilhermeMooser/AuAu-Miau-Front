@@ -1,6 +1,6 @@
 import { adoptersCache } from "@/constants/cacheNames";
 import { useError } from "@/hooks/useError";
-import { useModal } from "@/hooks/useMobile";
+import { useModal } from "@/hooks/useModal";
 import { findAdopterById, getAdoptersPaginated } from "@/services/adopter";
 import {
   Adopter,

@@ -165,7 +165,7 @@ export const adotanteService = {
     params.append("limit", String(limit));
 
     const response = await api.get<FindAllAdoptersPaginated>(
-      `/api/adopter/v1?${params.toString()}`
+      `/adopter/v1?${params.toString()}`
     );
     console.log(response.data.items)
     return {
@@ -182,7 +182,7 @@ export const adotanteService = {
 
   // Buscar adotante por ID
   getById: async (id: string): Promise<Adopter> => {
-    const response = await api.get<Adopter>(`/api/adopter/v1/${id}`);
+    const response = await api.get<Adopter>(`/adopter/v1/${id}`);
     return response.data;
   },
 
@@ -190,26 +190,26 @@ export const adotanteService = {
   create: async (data: CreateAdopterDto): Promise<Adopter> => {
     // const backendData = mapFrontendToBackend(data);
     console.log(data);
-    const response = await api.post<Adopter>("/api/adopter/v1", data);
+    const response = await api.post<Adopter>("/adopter/v1", data);
     return response.data;
   },
 
   // Atualizar adotante
   update: async (id: string, data: Adopter): Promise<Adopter> => {
     // const backendData = mapFrontendToBackend(data);
-    const response = await api.put<Adopter>(`/api/adopter/v1/${id}`, data);
+    const response = await api.put<Adopter>(`/adopter/v1/${id}`, data);
     return response.data;
   },
 
   // Deletar adotante
   delete: async (id: string): Promise<void> => {
-    await api.delete(`/api/adopter/v1/${id}`);
+    await api.delete(`/adopter/v1/${id}`);
   },
 
   // Buscar adotantes por nome ou CPF
   search: async (query: string): Promise<MinimalAdopter[]> => {
     const response = await api.get<FindAllAdoptersPaginated>(
-      `/api/adopter/v1?search=${encodeURIComponent(query)}`
+      `/adopter/v1?search=${encodeURIComponent(query)}`
     );
     return response.data.items;
   },

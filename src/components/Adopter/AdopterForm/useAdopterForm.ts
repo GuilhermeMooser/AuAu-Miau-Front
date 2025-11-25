@@ -9,10 +9,15 @@ import { adoptersCache, cityCache, stateUfCache } from "@/constants/cacheNames";
 import { locationService } from "@/services/locationService";
 import { toast } from "@/hooks/use-toast";
 import { useFormError } from "@/hooks/useFormError";
-import { createAdopter, updateAdopter } from "@/services/adopter";
+import {
+  createAdopter,
+  deleteAdopter,
+  updateAdopter,
+} from "@/services/adopter";
 import { useQueryCache } from "@/hooks/useQueryCache";
 import { mutationErrorHandling } from "@/utils/errorHandling";
 import { useError } from "@/hooks/useError";
+import { useModal } from "@/hooks/useModal";
 
 type Props = {
   adopter: AdopterFormProps["adopter"];
@@ -21,7 +26,6 @@ type Props = {
 };
 
 export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
-  console.log(adopter);
   /** Form */
   const form = useForm<AdopterFormData>({
     resolver: zodResolver(adopterSchema),
@@ -193,7 +197,6 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     if (mode === "create") {
       createAdopterMutation(data);
     } else if (mode === "edit") {
-
       if (!adopter?.id) {
         setErrorMessage("O código do adotante não pode ser nulo");
         return;
@@ -204,11 +207,7 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
         ...data,
       });
     }
-    //  else {
-    //   //mode === 'view'
-    // }
 
-    console.log(data);
     setSubmitting(true);
   };
 
@@ -218,7 +217,8 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
   };
 
   /**Query Cache */
-  const { addItemOnScreen, updateItemOnScreen } = useQueryCache();
+  const { addItemOnScreen, updateItemOnScreen, removeItemFromScreen } =
+    useQueryCache();
 
   /**Mutations */
   const { mutate: createAdopterMutation } = useMutation({
@@ -294,6 +294,43 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     }
   };
 
+  /** Delete Adopter */
+  const canExcludeAdopter = mode === "edit";
+
+  const {
+    isModalOpen: isModalDeleteAdopterOpen,
+    handleOpenModal: handleOpenDeleteAdopterModal,
+    handleCloseModal: handleCloseDeleteAdopterModal,
+  } = useModal();
+
+  const handleDeleteAdopter = () => {
+    handleOpenDeleteAdopterModal();
+  };
+
+  const handleDeleteAdopterConfirm = () => {
+    if (!adopter?.id) return;
+    deleteAdopterMutation(adopter.id);
+  };
+
+  const { mutate: deleteAdopterMutation } = useMutation({
+    mutationFn: async (id: string) => {
+      return (await deleteAdopter(id)).data;
+    },
+    onSuccess: () => {
+      if (!adopter?.id) return;
+      removeItemFromScreen([adoptersCache], adopter.id);
+      handleCloseDeleteAdopterModal();
+      handleCloseModal();
+    },
+    onError: (error) => {
+      mutationErrorHandling(
+        error,
+        "Falha ao excluir o adotante",
+        setErrorMessage
+      );
+    },
+  });
+
   return {
     form,
     isReadOnly,
@@ -309,6 +346,11 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     prUfId,
     prState,
     errorMessage,
+    isModalDeleteAdopterOpen,
+    canExcludeAdopter,
+    handleDeleteAdopterConfirm,
+    handleDeleteAdopter,
+    handleCloseDeleteAdopterModal,
     clearError,
     onError,
     appendContato,

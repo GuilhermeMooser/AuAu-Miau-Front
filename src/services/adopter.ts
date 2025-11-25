@@ -15,7 +15,7 @@ export const getAdoptersPaginated = async (
   limit?: number
 ) => {
   const url = addSearchParamsInUrl(
-    "api/adopter/v1",
+    "/adopter/v1",
     { name: "s", value: search },
     { name: "status", value: filters?.status },
     { name: "cityId", value: filters?.city },
@@ -31,7 +31,7 @@ export const getAdoptersPaginated = async (
 };
 
 export const findAdopterById = async (id: string) => {
-  const response = await api.get<Adopter>(`/api/adopter/v1/${id}`);
+  const response = await api.get<Adopter>(`/adopter/v1/${id}`);
   return response;
 };
 
@@ -40,7 +40,7 @@ export const createAdopter = async (createAdopterDto: CreateAdopterDto) => {
     ...createAdopterDto,
   };
 
-  const response = await api.post<Adopter>("/api/adopter/v1", body);
+  const response = await api.post<Adopter>("/adopter/v1", body);
   return response;
 };
 
@@ -49,6 +49,11 @@ export const updateAdopter = async (updateAdopterDto: UpdateAdopterDto) => {
     ...updateAdopterDto,
   };
 
-  const response = await api.put<Adopter>("/api/adopter/v1", body);
+  const response = await api.put<Adopter>("/adopter/v1", body);
+  return response;
+};
+
+export const deleteAdopter = async (id: string) => {
+  const response = await api.delete<void>(`adopter/v1/${id}`);
   return response;
 };

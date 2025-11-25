@@ -15,12 +15,12 @@ export type UF = {
 export const locationService = {
   getUFs: async (): Promise<UF[]> => {
     console.log('Chamou query')
-    const response = await api.get<UF[]>("/api/uf/v1");
+    const response = await api.get<UF[]>("/uf/v1");
     return response.data;
   },
 
   getCitiesByUF: async (ufId: number): Promise<City[]> => {
-    const response = await api.get<City[]>(`/api/city/v1/uf/${ufId}`);
+    const response = await api.get<City[]>(`/city/v1/uf/${ufId}`);
     return response.data;
   },
 };

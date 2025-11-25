@@ -7,8 +7,7 @@ interface ModalProps {
   onClose: () => void;
   children?: ReactNode;
   width?: string | number;
-  cancelIcon?: boolean;
-  contentStyle?: string; // estilos extras no conteúdo
+  contentStyle?: string;
 }
 
 export default function Modal({
