@@ -89,9 +89,7 @@ export type AdopterFormData = z.infer<typeof adopterSchema>;
 
 export type AdopterFilterFormData = z.infer<typeof adopterFiltersSchema>;
 
-/**Filters with Nome, CPF, Email + AdopterFilters*/
 export type AdopterFilters = {
-  status?: "active" | "inactive" | "";
   city?: string;
   stateUf?: string;
   createdAt?: Date;

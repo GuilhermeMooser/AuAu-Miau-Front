@@ -60,7 +60,6 @@ export const adopterSchema = z.object({
 /**NEW */
 
 export const adopterFiltersSchema = z.object({
-  status: z.enum(["active", "inactive"]).optional().or(z.literal("")),
   city: z.string().optional(),
   stateUf: z.string().optional(),
   createdAt: z.date().optional(),

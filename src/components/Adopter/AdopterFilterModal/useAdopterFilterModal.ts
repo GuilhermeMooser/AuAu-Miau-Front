@@ -20,7 +20,6 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
   const form = useForm<AdopterFilterFormData>({
     resolver: zodResolver(adopterFiltersSchema),
     defaultValues: {
-      status: activeFilters.status,
       city: activeFilters.city || "",
       stateUf: activeFilters.stateUf || "",
       createdAt: activeFilters.createdAt,
@@ -76,7 +75,6 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
 
   const handleClear = () => {
     form.reset({
-      status: "",
       city: "",
       stateUf: "",
       createdAt: undefined,

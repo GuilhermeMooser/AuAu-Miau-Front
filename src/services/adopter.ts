@@ -17,7 +17,6 @@ export const getAdoptersPaginated = async (
   const url = addSearchParamsInUrl(
     "/adopter/v1",
     { name: "s", value: search },
-    { name: "status", value: filters?.status },
     { name: "cityId", value: filters?.city },
     { name: "stateUfId", value: filters?.stateUf },
     { name: "createdAt", value: filters?.createdAt?.toString() },

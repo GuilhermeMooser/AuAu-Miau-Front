@@ -67,30 +67,7 @@ export default function AdopterFilterModal({
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Todos os status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="active">Ativo</SelectItem>
-                          <SelectItem value="inactive">Inativo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-4">
                 <FormField
                   control={form.control}
                   name="stateUf"
@@ -155,8 +132,6 @@ export default function AdopterFilterModal({
                     </FormItem>
                   )}
                 />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="createdAt"
@@ -189,23 +164,23 @@ export default function AdopterFilterModal({
                     </FormItem>
                   )}
                 />
-                <div className="flex items-end gap-x-2 justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      handleClear();
-                      handleClearFilter();
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                    Limpar Filtros
-                  </Button>
-                  <Button onClick={form.handleSubmit(handleApplyFilter)}>
-                    <Search className="h-4 w-4" />
-                    Aplicar Filtros
-                  </Button>
-                </div>
+              </div>
+              <div className="flex items-end gap-x-2 justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    handleClear();
+                    handleClearFilter();
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                  Limpar Filtros
+                </Button>
+                <Button onClick={form.handleSubmit(handleApplyFilter)}>
+                  <Search className="h-4 w-4" />
+                  Aplicar Filtros
+                </Button>
               </div>
             </Form>
           </CardContent>
