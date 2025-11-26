@@ -62,6 +62,6 @@ export const adopterSchema = z.object({
 export const adopterFiltersSchema = z.object({
   city: z.string().optional(),
   stateUf: z.string().optional(),
-  createdAt: z.date().optional(),
-  dtToNotify: z.date().optional(),
+  createdAt: z.date().nullable().optional(),
+  dtToNotify: z.date().nullable().optional(),
 });

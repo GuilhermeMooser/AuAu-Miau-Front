@@ -77,8 +77,8 @@ export const useAdopterFilterModal = ({ activeFilters }: Props) => {
     form.reset({
       city: "",
       stateUf: "",
-      createdAt: undefined,
-      dtToNotify: undefined,
+      createdAt: null,
+      dtToNotify: null,
     });
   };
 
