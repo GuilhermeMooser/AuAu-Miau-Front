@@ -46,12 +46,18 @@ export type AdopterFormProps = {
   adopter?: Adopter;
   onCancel: () => void;
   mode: "create" | "edit" | "view";
+  onCreateSuccess?: (newAdopter: Adopter) => void;
+  onUpdateSuccess?: (updatedAdopter: Adopter) => void;
+  onDeleteSuccess?: (deletedId: string) => void;
 };
 
 export default function AdopterForm({
   adopter,
   mode,
   onCancel,
+  onCreateSuccess,
+  onUpdateSuccess,
+  onDeleteSuccess,
 }: AdopterFormProps) {
   const {
     form,
@@ -89,6 +95,9 @@ export default function AdopterForm({
     adopter,
     mode,
     onCancel,
+    onCreateSuccess,
+    onUpdateSuccess,
+    onDeleteSuccess,
   });
 
   return (

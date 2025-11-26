@@ -5,7 +5,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { AdopterFormProps } from ".";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { adoptersCache, cityCache, stateUfCache } from "@/constants/cacheNames";
+import { cityCache, stateUfCache } from "@/constants/cacheNames";
 import { locationService } from "@/services/locationService";
 import { toast } from "@/hooks/use-toast";
 import { useFormError } from "@/hooks/useFormError";
@@ -14,7 +14,6 @@ import {
   deleteAdopter,
   updateAdopter,
 } from "@/services/adopter";
-import { useQueryCache } from "@/hooks/useQueryCache";
 import { mutationErrorHandling } from "@/utils/errorHandling";
 import { useError } from "@/hooks/useError";
 import { useModal } from "@/hooks/useModal";
@@ -23,9 +22,19 @@ type Props = {
   adopter: AdopterFormProps["adopter"];
   mode: AdopterFormProps["mode"];
   onCancel: AdopterFormProps["onCancel"];
+  onCreateSuccess: AdopterFormProps["onCreateSuccess"];
+  onUpdateSuccess: AdopterFormProps["onUpdateSuccess"];
+  onDeleteSuccess: AdopterFormProps["onDeleteSuccess"];
 };
 
-export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
+export const useAdopterForm = ({
+  adopter,
+  mode,
+  onCancel,
+  onCreateSuccess,
+  onUpdateSuccess,
+  onDeleteSuccess,
+}: Props) => {
   /** Form */
   const form = useForm<AdopterFormData>({
     resolver: zodResolver(adopterSchema),
@@ -216,10 +225,6 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     form.reset();
   };
 
-  /**Query Cache */
-  const { addItemOnScreen, updateItemOnScreen, removeItemFromScreen } =
-    useQueryCache();
-
   /**Mutations */
   const { mutate: createAdopterMutation } = useMutation({
     mutationFn: async (createAdopterDto: CreateAdopterDto) => {
@@ -233,7 +238,9 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
         description: "Adotante criado com sucesso",
         variant: "success",
       });
-      addItemOnScreen([adoptersCache], data);
+      if (onCreateSuccess) {
+        onCreateSuccess(data);
+      }
       handleCloseModal();
     },
     onError: (error) => {
@@ -259,7 +266,9 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
         description: "Adotante atualizado com sucesso",
         variant: "success",
       });
-      updateItemOnScreen([adoptersCache], data);
+      if (onUpdateSuccess) {
+        onUpdateSuccess(data);
+      }
       handleCloseModal();
     },
     onError: (error) => {
@@ -318,11 +327,14 @@ export const useAdopterForm = ({ adopter, mode, onCancel }: Props) => {
     },
     onSuccess: () => {
       if (!adopter?.id) return;
-      removeItemFromScreen([adoptersCache], adopter.id);
+      if (onDeleteSuccess) {
+        onDeleteSuccess(adopter.id);
+      }
       handleCloseDeleteAdopterModal();
       handleCloseModal();
     },
     onError: (error) => {
+      console.log(error);
       mutationErrorHandling(
         error,
         "Falha ao excluir o adotante",

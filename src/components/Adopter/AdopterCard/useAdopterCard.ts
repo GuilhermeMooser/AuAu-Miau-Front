@@ -20,9 +20,10 @@ export const useAdopterCard = ({ adopter }: Props) => {
 
   const daysUntilContact = useMemo(() => {
     if (!adopter.dtToNotify) return null;
+    const notifyDate = new Date(adopter.dtToNotify);
     const today = new Date();
     return Math.ceil(
-      (adopter.dtToNotify.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      (notifyDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
     );
   }, [adopter.dtToNotify]);
 
