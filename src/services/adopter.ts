@@ -19,8 +19,8 @@ export const getAdoptersPaginated = async (
     { name: "s", value: search },
     { name: "cityId", value: filters?.city },
     { name: "stateUfId", value: filters?.stateUf },
-    { name: "createdAt", value: filters?.createdAt?.toString() },
-    { name: "dtToNotify", value: filters?.dtToNotify?.toString() },
+    { name: "createdAt", value: filters?.createdAt?.toISOString() },
+    { name: "dtToNotify", value: filters?.dtToNotify?.toISOString() },
     { name: "page", value: page },
     { name: "limit", value: limit }
   );
