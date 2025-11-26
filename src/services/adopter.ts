@@ -27,7 +27,7 @@ export const getAdoptersPaginated = async (
   );
 
   const response = await api.get<FindAllAdoptersPaginated>(url);
-  return response;
+  return response.data;
 };
 
 export const findAdopterById = async (id: string) => {
