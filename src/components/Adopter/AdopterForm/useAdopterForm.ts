@@ -231,7 +231,6 @@ export const useAdopterForm = ({
     }
   };
 
-  // Função helper para obter cidades do endereço específico
   const getCitiesForAddress = (index: number) => {
     const stateId = getCurrentStateUfId(index);
     return getCitiesForState(stateId);
@@ -393,7 +392,6 @@ export const useAdopterForm = ({
     enderecosFields,
     statesData,
     citiesData,
-    getCitiesForState,
     loadingLocations,
     isLoadingStates,
     isLoadingCities,
@@ -402,6 +400,7 @@ export const useAdopterForm = ({
     errorMessage,
     isModalDeleteAdopterOpen,
     canExcludeAdopter,
+    getCitiesForState,
     handleDeleteAdopterConfirm,
     handleDeleteAdopter,
     handleCloseDeleteAdopterModal,
