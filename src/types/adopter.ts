@@ -92,6 +92,6 @@ export type AdopterFilterFormData = z.infer<typeof adopterFiltersSchema>;
 export type AdopterFilters = {
   city?: string;
   stateUf?: string;
-  createdAt?: Date;
-  dtToNotify?: Date;
+  createdAt?: Date | null;
+  dtToNotify?: Date | null;
 };
