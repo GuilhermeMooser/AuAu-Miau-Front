@@ -2,6 +2,7 @@ import { adoptersCache } from "@/constants/cacheNames";
 import { GLOBAL_ERROR_HANDLERS } from "@/constants/errorHandlers";
 import { useError } from "@/hooks/useError";
 import { useModal } from "@/hooks/useModal";
+import { useQueryCachePagination } from "@/hooks/useQueryCachePagination";
 import { useQueryError } from "@/hooks/useQueryError";
 import { findAdopterById, getAdoptersPaginated } from "@/services/adopter";
 import {
@@ -11,9 +12,10 @@ import {
   MinimalAdopter,
 } from "@/types";
 import { mutationErrorHandling } from "@/utils/errorHandling";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { PaginationUtils } from "@/utils/paginationUtils";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 type ModalAction = "edit" | "view";
 
@@ -74,31 +76,12 @@ export const useAdopter = () => {
 
   const handleApplyFilter = (data: AdopterFilterFormData) => {
     setActiveFilter(data);
-    //Fazer Request TODO
+    setShowFilters(false);
   };
 
   const handleClearFilter = () => {
     setActiveFilter({});
   };
-
-  /** Adopters data */
-
-  const { data: adoptersData, error: errorAdoptersFetch } = useQuery({
-    queryKey: [adoptersCache],
-    queryFn: async () =>
-      (await getAdoptersPaginated(searchTerm, activeFilters)).data,
-  });
-
-  useQueryError({
-    error: errorAdoptersFetch,
-    setErrorMessage,
-    clearErrorMessage: clearError,
-    statusHandlers: [
-      ...GLOBAL_ERROR_HANDLERS,
-      { statusCode: 401, message: "Acesso não autorizado." },
-      { statusCode: 404, message: "Os adotantes não foram encontrados." },
-    ],
-  });
 
   /** Functions and logics */
 
@@ -145,27 +128,111 @@ export const useAdopter = () => {
     },
   });
 
+  /** Pagination */
+
+  const {
+    data,
+    error: errorAdoptersFetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["adopters", searchTerm, activeFilters],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = getAdoptersPaginated(
+        searchTerm,
+        activeFilters,
+        pageParam,
+        PaginationUtils.limit
+      );
+      return response;
+    },
+    getNextPageParam: (lastPage) => {
+      const { currentPage, totalPages } = lastPage.meta;
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+    initialPageParam: 1,
+    enabled: true,
+    staleTime: 30000,
+  });
+
+  const adoptersData = {
+    items: data?.pages.flatMap((page) => page.items) ?? [],
+    meta: data?.pages[data.pages.length - 1]?.meta,
+  };
+
+  useQueryError({
+    error: errorAdoptersFetch,
+    setErrorMessage,
+    clearErrorMessage: clearError,
+    statusHandlers: [
+      ...GLOBAL_ERROR_HANDLERS,
+      { statusCode: 401, message: "Acesso não autorizado." },
+      { statusCode: 404, message: "Os adotantes não foram encontrados." },
+    ],
+  });
+
+  /** Handlers */
+  const { addItemOnScreen, updateItemOnScreen, removeItemFromScreen } =
+    useQueryCachePagination();
+
+  const handleCreateSuccess = useCallback(
+    (newAdopter: Adopter) => {
+      console.log(newAdopter)
+
+      const queryKey = ["adopters", searchTerm, activeFilters];
+      addItemOnScreen<Adopter>(queryKey, newAdopter, false);
+    },
+    [searchTerm, activeFilters, addItemOnScreen]
+  );
+
+  const handleUpdateSuccess = useCallback(
+    (updatedAdopter: Adopter) => {
+      console.log(updatedAdopter)
+      updateItemOnScreen<Adopter>(["adopters"], updatedAdopter);
+    },
+    [updateItemOnScreen]
+  );
+
+  const handleDeleteSuccess = useCallback(
+    (deletedId: string) => {
+      console.log(deletedId)
+      removeItemFromScreen<Adopter>(["adopters"], deletedId);
+    },
+    [removeItemFromScreen]
+  );
+
   return {
     isCreateModalOpen,
+    isEditModalOpen,
+    isViewModalOpen,
+    handleOpenCreateModal,
+    handleCloseCreateModalFn,
+    handleCloseEditModalFn,
+    handleCloseViewModalFn,
     searchTerm,
     filtersCount,
     showFilters,
     activeFilters,
-    adoptersData,
-    selectedAdopter,
-    errorMessage,
-    isEditModalOpen,
-    isViewModalOpen,
-    handleViewClick,
-    handleCloseViewModalFn,
-    handleCloseCreateModalFn,
-    handleCloseEditModalFn,
-    clearError,
-    handleOpenCreateModal,
     onToggleFilters,
     handleChangeFilter,
     handleApplyFilter,
     handleClearFilter,
+    adoptersData,
+    selectedAdopter,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    errorMessage,
+    clearError,
     handleEditClick,
+    handleViewClick,
+    fetchNextPage,
+    refetch,
+    handleCreateSuccess,
+    handleUpdateSuccess,
+    handleDeleteSuccess
   };
 };

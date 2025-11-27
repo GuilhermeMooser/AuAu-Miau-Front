@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import AdopterForm from "@/components/Adopter/AdopterForm";
 import Alert from "@/components/Alert";
+import { InfiniteScrollContainer } from "@/components/InfiteScrollContainer";
 
 export default function Adopter() {
   const {
@@ -37,6 +38,14 @@ export default function Adopter() {
     handleClearFilter,
     handleEditClick,
     handleViewClick,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    handleCreateSuccess,
+    handleUpdateSuccess,
+    handleDeleteSuccess
   } = useAdopter();
 
   return (
@@ -58,17 +67,31 @@ export default function Adopter() {
           handleClearFilter={handleClearFilter}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-          {adoptersData?.items?.map((adopter) => {
-            return (
+        <InfiniteScrollContainer
+          hasNextPage={hasNextPage ?? false}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          threshold={100}
+          loader={
+            <div className="col-span-full flex items-center justify-center gap-2 py-8">
+              <div className="w-6 h-6 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+              <span className="text-gray-600">
+                Carregando mais adotantes...
+              </span>
+            </div>
+          }
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            {adoptersData.items.map((adopter) => (
               <AdopterCard
+                key={adopter.id}
                 adopter={adopter}
                 handleEditClick={handleEditClick}
                 handleViewAdotante={handleViewClick}
               />
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        </InfiniteScrollContainer>
 
         {adoptersData?.items?.length === 0 && (
           <div className="text-center py-12">
@@ -95,7 +118,7 @@ export default function Adopter() {
             <DialogHeader>
               <DialogTitle>Cadastrar Novo Adotante</DialogTitle>
             </DialogHeader>
-            <AdopterForm mode="create" onCancel={handleCloseCreateModalFn} />
+            <AdopterForm mode="create" onCancel={handleCloseCreateModalFn} onCreateSuccess={handleCreateSuccess}/>
           </DialogContent>
         </Dialog>
         {/* Edit Modal */}
@@ -108,6 +131,8 @@ export default function Adopter() {
               mode="edit"
               adopter={selectedAdopter}
               onCancel={handleCloseEditModalFn}
+              onUpdateSuccess={handleUpdateSuccess}
+              onDeleteSuccess={handleDeleteSuccess}
             />
           </DialogContent>
         </Dialog>
