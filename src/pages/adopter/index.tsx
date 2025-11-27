@@ -71,7 +71,7 @@ export default function Adopter() {
           hasNextPage={hasNextPage ?? false}
           isFetchingNextPage={isFetchingNextPage}
           fetchNextPage={fetchNextPage}
-          threshold={100}
+          threshold={0}
           loader={
             <div className="col-span-full flex items-center justify-center gap-2 py-8">
               <div className="w-6 h-6 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
