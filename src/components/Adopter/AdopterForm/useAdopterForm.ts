@@ -6,7 +6,7 @@ import { AdopterFormProps } from ".";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { cityCache, stateUfCache } from "@/constants/cacheNames";
-import { locationService } from "@/services/locationService";
+import { City, locationService } from "@/services/locationService";
 import { toast } from "@/hooks/use-toast";
 import { useFormError } from "@/hooks/useFormError";
 import {
@@ -158,13 +158,48 @@ export const useAdopterForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prState, mode]);
 
-  const selectedStateId = form.watch("addresses.0.city.stateUf.id") || prUfId;
+  const [citiesByState, setCitiesByState] = useState<Record<number, City[]>>(
+    {}
+  );
 
-  const { data: citiesData = [], isLoading: isLoadingCities } = useQuery({
-    queryKey: [`${cityCache}-${selectedStateId}`],
-    queryFn: () => locationService.getCitiesByUF(selectedStateId!),
-    enabled: !!selectedStateId,
+  const addresses = form.watch("addresses") || [];
+  const uniqueStateIds = Array.from(
+    new Set(
+      addresses
+        .map((addr) => addr?.city?.stateUf?.id)
+        .filter((id): id is number => id !== undefined && id > 0)
+    )
+  );
+
+  const citiesQueries = useQuery({
+    queryKey: [`${cityCache}-multiple`, uniqueStateIds.sort().join(",")],
+    queryFn: async () => {
+      const results: Record<number, City[]> = {};
+
+      await Promise.all(
+        uniqueStateIds.map(async (stateId) => {
+          const cities = await locationService.getCitiesByUF(stateId);
+          results[stateId] = cities;
+        })
+      );
+
+      return results;
+    },
+    enabled: uniqueStateIds.length > 0,
   });
+
+  useEffect(() => {
+    if (citiesQueries.data) {
+      setCitiesByState(citiesQueries.data);
+    }
+  }, [citiesQueries.data]);
+
+  const getCitiesForState = (stateId: number) => {
+    return citiesByState[stateId] || [];
+  };
+
+  const selectedStateId = form.watch("addresses.0.city.stateUf.id") || prUfId;
+  const citiesData = getCitiesForState(selectedStateId || 0);
 
   const getCurrentStateUfId = (index: number) => {
     return form.watch(`addresses.${index}.city.stateUf.id`) || 0;
@@ -179,13 +214,16 @@ export const useAdopterForm = ({
     if (!selectedUF) return;
 
     form.setValue(`addresses.${index}.city.stateUf`, selectedUF);
-    /**Clear Cities */
+
     form.setValue(`addresses.${index}.city.id`, 0);
     form.setValue(`addresses.${index}.city.name`, "");
   };
 
   const handleCityChange = (index: number, value: string) => {
-    const selectedCity = citiesData.find((c) => c.id === Number(value));
+    const stateId = getCurrentStateUfId(index);
+    const cities = getCitiesForState(stateId);
+    const selectedCity = cities.find((c) => c.id === Number(value));
+
     if (selectedCity) {
       form.setValue(`addresses.${index}.city`, selectedCity, {
         shouldValidate: true,
@@ -193,10 +231,18 @@ export const useAdopterForm = ({
     }
   };
 
-  const loadingLocations = isLoadingStates || isLoadingCities;
+  // Função helper para obter cidades do endereço específico
+  const getCitiesForAddress = (index: number) => {
+    const stateId = getCurrentStateUfId(index);
+    return getCitiesForState(stateId);
+  };
+
+  const loadingLocations = isLoadingStates || citiesQueries.isLoading;
+  const isLoadingCities = citiesQueries.isLoading;
 
   /**Actions */
   const [submitting, setSubmitting] = useState<boolean>(false);
+
   const handleButtonConfirm = (data: AdopterFormData) => {
     if (data.activeNotification && !data.dtToNotify) {
       verifyNotificationConfig(data);
@@ -210,13 +256,11 @@ export const useAdopterForm = ({
         setErrorMessage("O código do adotante não pode ser nulo");
         return;
       }
-
       updateAdopterMutation({
         id: adopter.id,
         ...data,
       });
     }
-
     setSubmitting(true);
   };
 
@@ -230,7 +274,6 @@ export const useAdopterForm = ({
     mutationFn: async (createAdopterDto: CreateAdopterDto) => {
       return (await createAdopter(createAdopterDto)).data;
     },
-
     onSuccess: (data) => {
       setSubmitting(false);
       toast({
@@ -258,7 +301,6 @@ export const useAdopterForm = ({
     mutationFn: async (updateAdopterDto: UpdateAdopterDto) => {
       return (await updateAdopter({ ...updateAdopterDto })).data;
     },
-
     onSuccess: (data) => {
       setSubmitting(false);
       toast({
@@ -289,7 +331,6 @@ export const useAdopterForm = ({
         message:
           "Data de notificação é obrigatória quando notificações estão ativas",
       });
-
       toast({
         title: "Verifique os campos",
         description:
@@ -352,6 +393,7 @@ export const useAdopterForm = ({
     enderecosFields,
     statesData,
     citiesData,
+    getCitiesForState,
     loadingLocations,
     isLoadingStates,
     isLoadingCities,
@@ -365,6 +407,7 @@ export const useAdopterForm = ({
     handleCloseDeleteAdopterModal,
     clearError,
     onError,
+    getCitiesForAddress,
     appendContato,
     removeContato,
     getContactMask,

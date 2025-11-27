@@ -73,6 +73,7 @@ export default function AdopterForm({
     errorMessage,
     isModalDeleteAdopterOpen,
     canExcludeAdopter,
+    getCitiesForAddress,
     handleCloseDeleteAdopterModal,
     clearError,
     onError,
@@ -637,7 +638,7 @@ export default function AdopterForm({
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {citiesData?.map((city) => (
+                                  {getCitiesForAddress(index)?.map((city) => (
                                     <SelectItem
                                       key={city.id}
                                       value={city.id.toString()}
