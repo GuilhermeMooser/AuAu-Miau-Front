@@ -1,6 +1,6 @@
-import React from 'react';
-import { LogOut, User, Settings, Bell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { LogOut, User, Settings, Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,19 +8,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { useAuth } from '@/contexts/AuthContext';
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { getAuth, logout } from "@/utils/auth";
 
 const AppHeader: React.FC = () => {
-  const { user, logout } = useAuth();
+  const auth = getAuth();
 
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
@@ -47,10 +47,13 @@ const AppHeader: React.FC = () => {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Button
+                variant="ghost"
+                className="relative h-10 w-10 rounded-full"
+              >
                 <Avatar className="h-10 w-10">
                   <AvatarFallback className="bg-gradient-primary text-white">
-                    {getInitials(user?.username || 'U')}
+                    {getInitials(auth?.user.name || "U")}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -58,12 +61,14 @@ const AppHeader: React.FC = () => {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.username}</p>
+                  <p className="text-sm font-medium leading-none">
+                    {auth?.user.name}
+                  </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
+                    {auth?.user.email}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground capitalize">
-                    {user?.role}
+                    {auth?.user.role.type}
                   </p>
                 </div>
               </DropdownMenuLabel>

@@ -22,13 +22,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/contexts/AuthContext";
+import { getAuth } from "@/utils/auth";
 
 const mainItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Animais", url: "/animais", icon: Heart },
-  { title: "Adotantes", url: "/adotantes", icon: Users },
-  { title: "Termos", url: "/termos", icon: FileText },
+  { title: "Dashboard", url: "/admin/dashboard", icon: Home },
+  { title: "Animais", url: "/admin/animais", icon: Heart },
+  { title: "Adotantes", url: "/admin/adotantes", icon: Users },
+  { title: "Termos", url: "/admin/termos", icon: FileText },
 ];
 
 const adminItems = [
@@ -38,7 +38,7 @@ const adminItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { user } = useAuth();
+  const auth = getAuth();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -48,7 +48,7 @@ export function AppSidebar() {
       ? "bg-sidebar-accent text-sidebar-primary font-medium border-r-2 border-sidebar-primary" 
       : "hover:bg-sidebar-accent/50";
 
-  const allItems = user?.role === 'admin' 
+  const allItems = auth?.user.role.type === 'Administrador' 
     ? [...mainItems, ...adminItems] 
     : mainItems;
 

@@ -1,98 +1,129 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-// Context
-import { AuthProvider } from "@/contexts/AuthContext";
-
-// Components
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-
-// Pages
-import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AnimaisPage from "./pages/animais/page";
-import AdotantesPage from "./pages/adotantes/page";
+import AdotantesPage from "./pages/adotantesAntigo/page";
 import Termos from "./pages/Termos";
 import NotFound from "./pages/NotFound";
 import queryClient from "./lib/queryClient";
-import Adopter from "./pages/adopter";
-
-
+import Adopter from "./pages/admin/adopter";
+import Login from "./pages/login";
+import { getAuth } from "./utils/auth";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            
-            {/* Redirect root to dashboard */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            
-            {/* Routes - Authentication disabled for development */}
-            <Route path="/dashboard" element={
-              <DashboardLayout>
-                <Dashboard />
-              </DashboardLayout>
-            } />
-            
-            <Route path="/animais" element={
-              <DashboardLayout>
-                <AnimaisPage />
-              </DashboardLayout>
-            } />
-            
-            <Route path="/adotantes" element={
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Redirect root to dashboard */}
+          {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
+
+          {/* Routes - Authentication disabled for development */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Dashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/animais"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AnimaisPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/adotantesOld"
+            element={
               <DashboardLayout>
                 <AdotantesPage />
               </DashboardLayout>
-            } />
+            }
+          />
 
-            <Route path="/adotantesNew" element={
-              <DashboardLayout>
-                <Adopter />
-              </DashboardLayout>
-            } />
-            
-            <Route path="/termos" element={
-              <DashboardLayout>
-                <Termos />
-              </DashboardLayout>
-            } />
-            
-            {/* Admin routes */}
-            <Route path="/contabilidade" element={
-              <DashboardLayout>
-                <div className="p-6">
-                  <h1 className="text-3xl font-bold text-foreground">Contabilidade</h1>
-                  <p className="text-muted-foreground">Módulo em desenvolvimento...</p>
-                </div>
-              </DashboardLayout>
-            } />
-            
-            <Route path="/usuarios" element={
-              <DashboardLayout>
-                <div className="p-6">
-                  <h1 className="text-3xl font-bold text-foreground">Usuários</h1>
-                  <p className="text-muted-foreground">Módulo em desenvolvimento...</p>
-                </div>
-              </DashboardLayout>
-            } />
-            
-            {/* Catch-all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+          <Route
+            path="/admin/adotantes"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Adopter />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/termos"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Termos />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route
+            path="/admin/contabilidade"
+            element={
+              <ProtectedRoute requiredRole={"Administrador"}>
+                <DashboardLayout>
+                  <div className="p-6">
+                    <h1 className="text-3xl font-bold text-foreground">
+                      Contabilidade
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Módulo em desenvolvimento...
+                    </p>
+                  </div>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/usuarios"
+            element={
+              <ProtectedRoute requiredRole={"Administrador"}>
+                <DashboardLayout>
+                  <div className="p-6">
+                    <h1 className="text-3xl font-bold text-foreground">
+                      Usuários
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Módulo em desenvolvimento...
+                    </p>
+                  </div>
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

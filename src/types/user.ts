@@ -1,11 +1,17 @@
-export interface User {
+export type User = {
   id: string;
-  username: string;
+  name: string;
   email: string;
-  role: 'admin' | 'user';
+  role: UserRole;
   createdAt: Date;
-}
+};
 
+type UserRole = {
+  id: string;
+  type: string;
+};
+
+//** EXCLUIR */
 export interface LoginRequest {
   username: string;
   password: string;
