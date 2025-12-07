@@ -1,11 +1,11 @@
-import React from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from './AppSidebar';
-import AppHeader from './AppHeader';
+import React from "react";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import AppHeader from "./AppHeader";
+import AppSidebar from "./AppSidebar";
 
-interface DashboardLayoutProps {
+type DashboardLayoutProps = {
   children: React.ReactNode;
-}
+};
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
@@ -15,9 +15,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="flex-1 flex flex-col min-w-0">
           <AppHeader />
           <main className="flex-1 overflow-auto p-4 md:p-6">
-            <div className="max-w-7xl mx-auto">
-              {children}
-            </div>
+            <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
       </div>

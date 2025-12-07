@@ -36,7 +36,7 @@ const adminItems = [
   { title: "Usuários", url: "/usuarios", icon: Settings },
 ];
 
-export function AppSidebar() {
+export default function AppSidebar() {
   const { state } = useSidebar();
   const auth = getAuth();
   const location = useLocation();
