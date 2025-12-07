@@ -5,11 +5,11 @@ export const authenticate = (login: Login) => {
   setCookie(null, "login", JSON.stringify(login), {
     maxAge: 1 * 24 * 60 * 60,
     path: "/",
-    domain: "localhost",
+    // domain: "localhost", LOCALMENTE TIRA
   });
 };
 
-export const logout = () => {
+export const logoutFront = () => {
   destroyCookie(null, "login", {
     path: "/",
     domain: "localhost",
