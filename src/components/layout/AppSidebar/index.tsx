@@ -44,7 +44,7 @@ export default function AppSidebar() {
       ? "bg-sidebar-accent text-sidebar-primary font-medium border-r-2 border-sidebar-primary" 
       : "hover:bg-sidebar-accent/50";
 
-  const allItems = auth?.user.role.type === 'Administrador' 
+  const allItems = auth?.user.role.name === 'Administrador' 
     ? [...mainItems, ...adminItems] 
     : mainItems;
 

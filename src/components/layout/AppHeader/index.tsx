@@ -70,7 +70,7 @@ export default function AppHeader() {
                       {auth?.user.email}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground capitalize">
-                      {auth?.user.role.type}
+                      {auth?.user.role.name}
                     </p>
                   </div>
                 </DropdownMenuLabel>

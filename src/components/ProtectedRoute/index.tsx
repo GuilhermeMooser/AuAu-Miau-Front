@@ -18,7 +18,7 @@ export default function ProtectedRoute({
 
   if (requiredRole) {
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-    if (!roles.includes(auth.user.role.type)) {
+    if (!roles.includes(auth.user.role.name)) {
       //   return <Navigate to="/dashboard" replace />;
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-4">
