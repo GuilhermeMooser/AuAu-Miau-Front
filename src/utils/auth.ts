@@ -3,7 +3,7 @@ import { Login } from "@/types/login";
 
 export const authenticate = (login: Login) => {
   setCookie(null, "login", JSON.stringify(login), {
-    maxAge: 1 * 24 * 60 * 60,
+    maxAge: 1 * 60 * 60,
     path: "/",
     // domain: "localhost", LOCALMENTE TIRA
   });

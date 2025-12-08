@@ -8,7 +8,7 @@ export type User = {
 
 type UserRole = {
   id: string;
-  type: string;
+  name: string;
 };
 
 //** EXCLUIR */

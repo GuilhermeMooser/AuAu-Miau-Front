@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   Home, 
@@ -6,10 +5,7 @@ import {
   Users, 
   Heart, 
   DollarSign, 
-  Settings,
-  Menu,
-  X
-} from "lucide-react";
+  Settings} from "lucide-react";
 
 import {
   Sidebar,

@@ -17,6 +17,8 @@ import {
 import { mutationErrorHandling } from "@/utils/errorHandling";
 import { useError } from "@/hooks/useError";
 import { useModal } from "@/hooks/useModal";
+import { getAuth } from "@/utils/auth";
+import { Role } from "@/constants/roles";
 
 type Props = {
   adopter: AdopterFormProps["adopter"];
@@ -35,6 +37,8 @@ export const useAdopterForm = ({
   onUpdateSuccess,
   onDeleteSuccess,
 }: Props) => {
+  const auth = getAuth();
+
   /** Form */
   const form = useForm<AdopterFormData>({
     resolver: zodResolver(adopterSchema),
@@ -342,9 +346,10 @@ export const useAdopterForm = ({
       });
     }
   };
-
+  
   /** Delete Adopter */
-  const canExcludeAdopter = mode === "edit";
+  const canExcludeAdopter =
+    mode === "edit" && auth?.user.role.name === Role.Admin;
 
   const {
     isModalOpen: isModalDeleteAdopterOpen,
