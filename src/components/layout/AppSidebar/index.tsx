@@ -29,7 +29,7 @@ const mainItems = [
 
 const adminItems = [
   { title: "Contabilidade", url: "/contabilidade", icon: DollarSign },
-  { title: "Usuários", url: "/usuarios", icon: Settings },
+  { title: "Usuários", url: "/admin/usuarios", icon: Settings },
 ];
 
 export default function AppSidebar() {

@@ -1,4 +1,7 @@
-export type User = {
+import { Audit } from "./audit";
+import { Pagination } from "./pagination";
+
+export type UserLogin = {
   id: string;
   name: string;
   email: string;
@@ -7,17 +10,31 @@ export type User = {
 };
 
 type UserRole = {
-  id: string;
+  id: number;
   name: string;
 };
 
-//** EXCLUIR */
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
+export type MinimalUser = {
+  id: string;
+  name: string;
+  cpf: string;
+  email: string;
+  active: boolean;
+  audit: Audit;
+  role: UserRole;
+};
 
-export interface AuthResponse {
-  token: string;
-  user: User;
-}
+export type User = {
+  id: string;
+  name: string;
+  cpf: string;
+  email: string;
+  active: boolean;
+  audit: Audit;
+  role: UserRole;
+  createdBy: MinimalUser;
+  updatedBy: MinimalUser;
+  deletedBy: MinimalUser;
+};
+
+export type FindAllUsersPaginated = Pagination<MinimalUser>;

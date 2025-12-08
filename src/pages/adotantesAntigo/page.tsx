@@ -53,7 +53,7 @@ const AdotantesPage = () => {
     adotantes,
     handleCreateAdotante,
     handleEditAdotante,
-    handleViewAdotante,
+    handleViewAdopter,
     handleEditClick,
     handleApplyFilters,
     handleClearFilters,
@@ -310,7 +310,7 @@ const AdotantesPage = () => {
                       variant="secondary"
                       size="sm"
                       className="flex-1"
-                      // onClick={() => handleViewAdotante(adotante)}
+                      // onClick={() => handleViewAdopter(adotante)}
                     >
                       <Eye className="h-3 w-3 sm:mr-1" />
                       <span className="hidden sm:inline ml-1">

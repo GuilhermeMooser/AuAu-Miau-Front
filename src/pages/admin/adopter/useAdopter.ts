@@ -222,7 +222,6 @@ export const useAdopter = () => {
     handleClearFilter,
     adoptersData,
     selectedAdopter,
-    isLoading,
     isFetchingNextPage,
     hasNextPage,
     errorMessage,
@@ -230,7 +229,6 @@ export const useAdopter = () => {
     handleEditClick,
     handleViewClick,
     fetchNextPage,
-    refetch,
     handleCreateSuccess,
     handleUpdateSuccess,
     handleDeleteSuccess

@@ -1,6 +1,6 @@
 import { loginSchema } from "@/validations/Login/schemas";
 import z from "zod";
-import { User } from "./user";
+import { UserLogin } from "./user";
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -10,5 +10,5 @@ export type LoginDto = {
 };
 
 export type Login = {
-  user: User;
+  user: UserLogin;
 };

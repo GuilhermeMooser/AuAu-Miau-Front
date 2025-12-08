@@ -3,19 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Filter, Search } from "lucide-react";
 
-type AdopterFilterProps = {
+type FilterInputSearchProps = {
   searchTerm: string;
   handleChangeFilter: (value: string) => void;
-  onToggleFilters: VoidFunction;
+  showFilterButton: boolean;
+  onToggleFilters?: VoidFunction;
   filtersCount?: number;
 };
 
-export default function AdopterFilter({
+export default function FilterInputSearch({
   searchTerm,
+  filtersCount = 0,
+  showFilterButton = true,
   handleChangeFilter,
   onToggleFilters,
-  filtersCount = 0,
-}: AdopterFilterProps) {
+}: FilterInputSearchProps) {
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
       <div className="flex-1 max-w-full sm:max-w-md">
@@ -29,19 +31,21 @@ export default function AdopterFilter({
           />
         </div>
       </div>
-      <Button
-        variant="outline"
-        className="w-full sm:w-auto"
-        onClick={onToggleFilters}
-      >
-        <Filter className="mr-2 h-4 w-4" />
-        Filtros
-        {filtersCount > 0 && (
-          <Badge variant="secondary" className="ml-2">
-            {filtersCount}
-          </Badge>
-        )}
-      </Button>
+      {showFilterButton && (
+        <Button
+          variant="outline"
+          className="w-full sm:w-auto"
+          onClick={onToggleFilters}
+        >
+          <Filter className="mr-2 h-4 w-4" />
+          Filtros
+          {filtersCount > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {filtersCount}
+            </Badge>
+          )}
+        </Button>
+      )}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import Adopter from "./pages/admin/adopter";
 import Login from "./pages/login";
 import { getAuth } from "./utils/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Users from "./pages/admin/users";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -102,18 +103,11 @@ const App = () => (
           />
 
           <Route
-            path="/usuarios"
+            path="/admin/usuarios"
             element={
               <ProtectedRoute requiredRole={"Administrador"}>
                 <DashboardLayout>
-                  <div className="p-6">
-                    <h1 className="text-3xl font-bold text-foreground">
-                      Usuários
-                    </h1>
-                    <p className="text-muted-foreground">
-                      Módulo em desenvolvimento...
-                    </p>
-                  </div>
+                  <Users />
                 </DashboardLayout>
               </ProtectedRoute>
             }

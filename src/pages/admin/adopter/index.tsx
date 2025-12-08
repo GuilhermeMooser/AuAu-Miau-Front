@@ -1,6 +1,4 @@
-import AdopterHeader from "@/components/Adopter/AdopterHeader";
 import { useAdopter } from "./useAdopter";
-import AdopterFilter from "@/components/Adopter/AdopterFilter";
 import AdopterFilterModal from "@/components/Adopter/AdopterFilterModal";
 import AdopterCard from "@/components/Adopter/AdopterCard";
 import { Plus, Users } from "lucide-react";
@@ -14,6 +12,8 @@ import {
 import AdopterForm from "@/components/Adopter/AdopterForm";
 import Alert from "@/components/Alert";
 import { InfiniteScrollContainer } from "@/components/InfiteScrollContainer";
+import Header from "@/components/Header";
+import FilterInputSearch from "@/components/FilterInputSearch";
 
 export default function Adopter() {
   const {
@@ -38,25 +38,30 @@ export default function Adopter() {
     handleClearFilter,
     handleEditClick,
     handleViewClick,
-    isLoading,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
-    refetch,
     handleCreateSuccess,
     handleUpdateSuccess,
-    handleDeleteSuccess
+    handleDeleteSuccess,
   } = useAdopter();
 
   return (
     <>
       <div className="space-y-6">
-        <AdopterHeader handleOpenCreateModal={handleOpenCreateModal} />
-        <AdopterFilter
+        <Header
+          headerName={"Adotantes"}
+          handleOpenCreateModal={handleOpenCreateModal}
+          headerSubtitle={"Gerencie todos os adotantes cadastrados"}
+          createEntityName={"Adotante"}
+        />
+
+        <FilterInputSearch
           searchTerm={searchTerm}
           handleChangeFilter={handleChangeFilter}
           onToggleFilters={onToggleFilters}
           filtersCount={filtersCount}
+          showFilterButton
         />
 
         <AdopterFilterModal
@@ -87,7 +92,7 @@ export default function Adopter() {
                 key={adopter.id}
                 adopter={adopter}
                 handleEditClick={handleEditClick}
-                handleViewAdotante={handleViewClick}
+                handleViewAdopter={handleViewClick}
               />
             ))}
           </div>
@@ -118,7 +123,11 @@ export default function Adopter() {
             <DialogHeader>
               <DialogTitle>Cadastrar Novo Adotante</DialogTitle>
             </DialogHeader>
-            <AdopterForm mode="create" onCancel={handleCloseCreateModalFn} onCreateSuccess={handleCreateSuccess}/>
+            <AdopterForm
+              mode="create"
+              onCancel={handleCloseCreateModalFn}
+              onCreateSuccess={handleCreateSuccess}
+            />
           </DialogContent>
         </Dialog>
         {/* Edit Modal */}

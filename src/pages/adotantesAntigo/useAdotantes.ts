@@ -38,7 +38,9 @@ export const useAdotantes = () => {
       const adoptersFormated: MinimalAdopter[] = response.items.map(
         (adotante) => ({
           ...adotante,
-          dtToNotify: adotante.dtToNotify ? new Date(adotante.dtToNotify) : undefined,
+          dtToNotify: adotante.dtToNotify
+            ? new Date(adotante.dtToNotify)
+            : undefined,
           audit: {
             ...adotante.audit,
             createdAt: new Date(adotante.audit.createdAt),
@@ -171,13 +173,13 @@ export const useAdotantes = () => {
     }
   };
 
-  const handleViewAdotante = (adotante: Adopter) => {
+  const handleViewAdopter = (adotante: Adopter) => {
     setSelectedMinimalAdotante(adotante);
     setShowViewModal(true);
   };
 
-  const handleEditClick = async ({id}: MinimalAdopter) => {
-    const selectedAdopter = await adotanteService.getById(id)
+  const handleEditClick = async ({ id }: MinimalAdopter) => {
+    const selectedAdopter = await adotanteService.getById(id);
     setSelectedAdotante(selectedAdopter);
     setShowEditModal(true);
   };
@@ -215,7 +217,7 @@ export const useAdotantes = () => {
     handleCreateAdotante,
     handleEditAdotante,
     handleDeleteAdotante,
-    handleViewAdotante,
+    handleViewAdopter,
     handleEditClick,
     handleApplyFilters,
     handleClearFilters,

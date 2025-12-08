@@ -16,13 +16,13 @@ import { formatCPF, formatPhoneNumber } from "@/utils/format";
 export type AdopterCardProps = {
   adopter: MinimalAdopter;
   handleEditClick: (adopter: MinimalAdopter) => void;
-  handleViewAdotante: (adopter: MinimalAdopter) => void;
+  handleViewAdopter: (adopter: MinimalAdopter) => void;
 };
 
 export default function AdopterCard({
   adopter,
   handleEditClick,
-  handleViewAdotante,
+  handleViewAdopter,
 }: AdopterCardProps) {
   const {
     primaryContact,
@@ -194,7 +194,7 @@ export default function AdopterCard({
               variant="secondary"
               size="sm"
               className="flex-1"
-              onClick={() => handleViewAdotante(adopter)}
+              onClick={() => handleViewAdopter(adopter)}
             >
               <Eye className="h-3 w-3 sm:mr-1" />
               <span className="hidden sm:inline ml-1">Ver Detalhes</span>
