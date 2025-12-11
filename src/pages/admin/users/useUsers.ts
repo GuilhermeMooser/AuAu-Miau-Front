@@ -1,15 +1,22 @@
 import { GLOBAL_ERROR_HANDLERS } from "@/constants/errorHandlers";
 import { useError } from "@/hooks/useError";
 import { useModal } from "@/hooks/useModal";
+import { useQueryCachePagination } from "@/hooks/useQueryCachePagination";
 import { useQueryError } from "@/hooks/useQueryError";
-import { getUsersPaginated } from "@/services/users";
-import { MinimalUser } from "@/types";
+import { findUserById, getUsersPaginated } from "@/services/users";
+import { MinimalUser, User } from "@/types";
+import { mutationErrorHandling } from "@/utils/errorHandling";
 import { PaginationUtils } from "@/utils/paginationUtils";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useCallback, useState } from "react";
+
+type ModalAction = "edit" | "view";
 
 export const useUsers = () => {
   const { errorMessage, clearError, setErrorMessage } = useError();
+  const [selectedUser, setSelectedUser] = useState<User | undefined>();
+  const [pendingAction, setPendingAction] = useState<ModalAction | null>(null);
 
   /** Create */
   const {
@@ -20,7 +27,33 @@ export const useUsers = () => {
 
   const handleCloseCreateModalFn = () => {
     handleCloseCreateModal();
-    // setSelectedAdopter(undefined);
+    setSelectedUser(undefined);
+  };
+
+  /** Edit */
+  const {
+    isModalOpen: isEditModalOpen,
+    handleCloseModal: handleCloseEditModal,
+    handleOpenModal: handleOpenEditModal,
+  } = useModal();
+
+  const handleCloseEditModalFn = () => {
+    setPendingAction(null);
+    handleCloseEditModal();
+    setSelectedUser(undefined);
+  };
+
+  /** View */
+  const {
+    isModalOpen: isViewModalOpen,
+    handleCloseModal: handleCloseViewModal,
+    handleOpenModal: handleOpenViewModal,
+  } = useModal();
+
+  const handleCloseViewModalFn = () => {
+    setPendingAction(null);
+    handleCloseViewModal();
+    setSelectedUser(undefined);
   };
 
   /** FilterInputSearch */
@@ -76,14 +109,71 @@ export const useUsers = () => {
 
   /** Functions and Logic */
   const handleEditClick = (user: MinimalUser) => {
-    // setPendingAction("edit");
-    // getAdopterById(adopter.id);
+    setPendingAction("edit");
+    getUserById(user.id);
   };
 
-  const handleViewClick = (adopter: MinimalUser) => {
-    // setPendingAction("view");
-    // getAdopterById(adopter.id);
+  const handleViewClick = (user: MinimalUser) => {
+    setPendingAction("view");
+    getUserById(user.id);
   };
+
+  const { mutate: getUserById } = useMutation({
+    mutationFn: async (id: string) => {
+      return (await findUserById(id)).data;
+    },
+
+    onSuccess: (data) => {
+      setSelectedUser(data);
+      if (pendingAction === "edit") {
+        handleOpenEditModal();
+      } else if (pendingAction === "view") {
+        handleOpenViewModal();
+      }
+    },
+    onError: (error) => {
+      mutationErrorHandling(
+        error,
+        "Falha ao buscar usuários",
+        setErrorMessage,
+        () => {
+          if (
+            error instanceof AxiosError &&
+            error.response?.data.statusCode === 404
+          ) {
+            setErrorMessage("Usuário não encontrado");
+            return true;
+          }
+        }
+      );
+    },
+  });
+
+  /** Handlers */
+  const { addItemOnScreen, updateItemOnScreen, removeItemFromScreen } =
+    useQueryCachePagination();
+
+  const handleCreateSuccess = useCallback(
+    (newUser: User) => {
+      const queryKey = ["users", searchTerm];
+      addItemOnScreen<User>(queryKey, newUser, false);
+    },
+    [searchTerm, addItemOnScreen]
+  );
+
+  const handleUpdateSuccess = useCallback(
+    (updatedUser: User) => {
+      updateItemOnScreen<User>(["users"], updatedUser);
+    },
+    [updateItemOnScreen]
+  );
+
+  const handleDeleteSuccess = useCallback(
+    (deletedId: string) => {
+      removeItemFromScreen<User>(["users"], deletedId);
+    },
+    [removeItemFromScreen]
+  );
 
   return {
     isCreateModalOpen,
@@ -91,11 +181,21 @@ export const useUsers = () => {
     hasNextPage,
     isFetchingNextPage,
     usersData,
+    isEditModalOpen,
+    selectedUser,
+    isViewModalOpen,
+    errorMessage,
+    clearError,
+    handleCloseViewModalFn,
+    handleCloseEditModalFn,
     handleEditClick,
     handleViewClick,
     fetchNextPage,
     handleChangeFilter,
     handleCloseCreateModalFn,
     handleOpenCreateModal,
+    handleUpdateSuccess,
+    handleCreateSuccess,
+    handleDeleteSuccess,
   };
 };

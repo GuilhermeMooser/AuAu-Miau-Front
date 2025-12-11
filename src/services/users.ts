@@ -1,6 +1,12 @@
 import { addSearchParamsInUrl } from "@/utils/generatedPaginatedUrl";
 import { api } from "./api";
-import { FindAllUsersPaginated } from "@/types";
+import {
+  CreateUserDto,
+  FindAllUsersPaginated,
+  UpdateUserDto,
+  User,
+  UserRole,
+} from "@/types";
 
 export const getUsersPaginated = async (
   search?: string,
@@ -16,4 +22,34 @@ export const getUsersPaginated = async (
 
   const response = await api.get<FindAllUsersPaginated>(url);
   return response.data;
+};
+
+export const getUsersRoles = async () => {
+  const response = await api.get<UserRole[]>("/user-role/v1");
+  return response.data;
+};
+
+export const createUser = async (createUserDto: CreateUserDto) => {
+  const body = {
+    ...createUserDto,
+    roleId: Number(createUserDto.roleId), //Need to convert to number
+  };
+
+  const response = await api.post<User>("/user/v1", body);
+  return response;
+};
+
+export const updateUser = async (updateUserDto: UpdateUserDto) => {
+  const body = {
+    ...updateUserDto,
+    roleId: Number(updateUserDto.roleId), //Need to convert to number
+  };
+
+  const response = await api.put<User>("/user/v1", body);
+  return response;
+};
+
+export const findUserById = async (id: string) => {
+  const response = await api.get<User>(`/user/v1/${id}`);
+  return response;
 };

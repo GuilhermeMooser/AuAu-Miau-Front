@@ -11,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import UserForm from "@/components/Users/UserForm";
+import Alert from "@/components/Alert";
 
 export default function Users() {
   const {
@@ -19,12 +21,22 @@ export default function Users() {
     hasNextPage,
     isFetchingNextPage,
     usersData,
+    isEditModalOpen,
+    selectedUser,
+    isViewModalOpen,
+    errorMessage,
+    clearError,
+    handleCloseViewModalFn,
+    handleCloseEditModalFn,
     handleEditClick,
     handleViewClick,
     fetchNextPage,
     handleChangeFilter,
     handleCloseCreateModalFn,
     handleOpenCreateModal,
+    handleCreateSuccess,
+    handleUpdateSuccess,
+    handleDeleteSuccess,
   } = useUsers();
 
   return (
@@ -94,14 +106,47 @@ export default function Users() {
             <DialogHeader>
               <DialogTitle>Cadastrar Novo Usuário</DialogTitle>
             </DialogHeader>
-            {/* <AdopterForm
+            <UserForm
               mode="create"
               onCancel={handleCloseCreateModalFn}
               onCreateSuccess={handleCreateSuccess}
-            /> */}
+            />
+          </DialogContent>
+        </Dialog>
+        {/* Edit Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={handleCloseEditModalFn}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+            <DialogHeader>
+              <DialogTitle>Editar Adotante</DialogTitle>
+            </DialogHeader>
+            <UserForm
+              mode="edit"
+              user={selectedUser}
+              onCancel={handleCloseEditModalFn}
+              onUpdateSuccess={handleUpdateSuccess}
+              onDeleteSuccess={handleDeleteSuccess}
+            />
+          </DialogContent>
+        </Dialog>
+        {/* View Modal */}
+        <Dialog open={isViewModalOpen} onOpenChange={handleCloseViewModalFn}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+            <DialogHeader>
+              <DialogTitle>Detalhes do Adotante</DialogTitle>
+            </DialogHeader>
+            <UserForm
+              mode="view"
+              user={selectedUser}
+              onCancel={handleCloseViewModalFn}
+            />
           </DialogContent>
         </Dialog>
       </div>
+      <Alert
+        content={errorMessage}
+        isOpen={!!errorMessage}
+        onClose={clearError}
+      />
     </>
   );
 }

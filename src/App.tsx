@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import AnimaisPage from "./pages/animais/page";
-import AdotantesPage from "./pages/adotantesAntigo/page";
+// import AdotantesPage from "./pages/adotantesAntigo/page";
 import Termos from "./pages/Termos";
 import NotFound from "./pages/NotFound";
 import queryClient from "./lib/queryClient";
@@ -52,14 +52,14 @@ const App = () => (
             }
           />
 
-          <Route
+          {/* <Route
             path="/adotantesOld"
             element={
               <DashboardLayout>
                 <AdotantesPage />
               </DashboardLayout>
             }
-          />
+          /> */}
 
           <Route
             path="/admin/adotantes"

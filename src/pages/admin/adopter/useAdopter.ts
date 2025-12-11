@@ -180,8 +180,6 @@ export const useAdopter = () => {
 
   const handleCreateSuccess = useCallback(
     (newAdopter: Adopter) => {
-      console.log(newAdopter)
-
       const queryKey = ["adopters", searchTerm, activeFilters];
       addItemOnScreen<Adopter>(queryKey, newAdopter, false);
     },
@@ -190,7 +188,6 @@ export const useAdopter = () => {
 
   const handleUpdateSuccess = useCallback(
     (updatedAdopter: Adopter) => {
-      console.log(updatedAdopter)
       updateItemOnScreen<Adopter>(["adopters"], updatedAdopter);
     },
     [updateItemOnScreen]
@@ -198,7 +195,6 @@ export const useAdopter = () => {
 
   const handleDeleteSuccess = useCallback(
     (deletedId: string) => {
-      console.log(deletedId)
       removeItemFromScreen<Adopter>(["adopters"], deletedId);
     },
     [removeItemFromScreen]

@@ -156,7 +156,7 @@ export default function AdopterForm({
                         {...field}
                         disabled={isReadOnly}
                         placeholder="email@gmail.com"
-                        className="bg-[#020817] border border-border text-white" // mesmo fundo e borda
+                        className="bg-[#020817] border border-border text-white"
                       />
                     </FormControl>
                     <FormMessage />
