@@ -8,12 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Icon from "@/components/Icon";
 import { Loader2, User as UserIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -29,6 +24,8 @@ import { InputPassword } from "@/components/ui/input-password";
 import { Button } from "@/components/ui/button";
 import Alert from "@/components/Alert";
 import ConfirmModal from "@/components/ConfirmModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 export type UserFormProps = {
   user?: User;
@@ -57,6 +54,8 @@ export default function UserForm({
     submitting,
     errorMessage,
     isModalDeleteUserOpen,
+    isEditing,
+    isSameUserLogged,
     handleCloseDeleteUserModal,
     handleDeleteUserConfirm,
     clearError,
@@ -80,17 +79,36 @@ export default function UserForm({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <UserIcon className="h-5 w-5" />
-                Informações do Usuário
+              <div className="flex justify-between  w-full">
+                <div className="flex items-center gap-2">
+                  <UserIcon className="h-5 w-5" />
+                  Informações do Usuário
+                </div>
+                {isEditing && (
+                  <div>
+                    <Badge
+                      className={`${
+                        user?.active
+                          ? "bg-success text-success-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {user?.active ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </div>
+                )}
               </div>
+
               {canExcludeUser && (
-                <div
-                  className="transition hover:text-red-500"
+                <button
+                  className={`transition hover:text-red-500 ${
+                    isSameUserLogged ? "text-zinc-900 hover:text-zinc-800" : ""
+                  }`}
                   onClick={handleDeleteUser}
+                  disabled={isSameUserLogged}
                 >
                   <Icon name="Trash2" />
-                </div>
+                </button>
               )}
             </CardTitle>
           </CardHeader>
@@ -206,6 +224,35 @@ export default function UserForm({
                       </Select>
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-64">
+              <FormField
+                control={form.control}
+                name="active"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between rounded-2xl border p-4 shadow-sm hover:shadow-md transition-all">
+                      <div className="flex flex-col">
+                        <FormLabel className="text-sm font-medium">
+                          Status do usuário
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                          Defina se o usuário está ativo
+                        </p>
+                      </div>
+
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isReadOnly}
+                          className="rounded-md h-5 w-5"
+                        />
+                      </FormControl>
+                    </div>
                   </FormItem>
                 )}
               />

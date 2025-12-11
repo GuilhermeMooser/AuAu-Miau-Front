@@ -39,6 +39,7 @@ export const useUserForm = ({
 }: Props) => {
   const auth = getAuth();
   const isReadOnly = mode === "view";
+  const isEditing = mode === "edit";
   const { onError } = useFormError<UserFormData>();
   const { errorMessage, clearError, setErrorMessage } = useError();
 
@@ -49,7 +50,8 @@ export const useUserForm = ({
       email: user?.email || "",
       cpf: user?.cpf || "",
       password: "",
-      roleId: user ? String(user.role.id) : undefined,
+      roleId: user ? String(user.role.id) : "",
+      active: user?.active ? user?.active : true,
     },
   });
 
@@ -61,6 +63,7 @@ export const useUserForm = ({
 
   /** Delete User */
   const canExcludeUser = mode === "edit" && auth?.user.role.name === Role.Admin;
+  const isSameUserLogged = user?.id === auth?.user.id;
 
   const {
     isModalOpen: isModalDeleteUserOpen,
@@ -191,6 +194,8 @@ export const useUserForm = ({
     submitting,
     errorMessage,
     isModalDeleteUserOpen,
+    isEditing,
+    isSameUserLogged,
     handleCloseDeleteUserModal,
     handleDeleteUserConfirm,
     clearError,
