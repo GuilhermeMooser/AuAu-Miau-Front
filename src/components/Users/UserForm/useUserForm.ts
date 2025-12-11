@@ -8,7 +8,12 @@ import { Role } from "@/constants/roles";
 import { useModal } from "@/hooks/useModal";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { userRolesCache } from "@/constants/cacheNames";
-import { createUser, getUsersRoles, updateUser } from "@/services/users";
+import {
+  createUser,
+  deleteUser,
+  getUsersRoles,
+  updateUser,
+} from "@/services/users";
 import { useState } from "react";
 import { useFormError } from "@/hooks/useFormError";
 import { mutationErrorHandling } from "@/utils/errorHandling";
@@ -74,7 +79,7 @@ export const useUserForm = ({
 
   const { mutate: deleteUserMutation } = useMutation({
     mutationFn: async (id: string) => {
-      return (await deleteUserMutation(id)).data;
+      return await deleteUser(id);
     },
     onSuccess: () => {
       if (!user?.id) return;

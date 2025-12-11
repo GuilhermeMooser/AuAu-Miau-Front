@@ -53,3 +53,7 @@ export const findUserById = async (id: string) => {
   const response = await api.get<User>(`/user/v1/${id}`);
   return response;
 };
+
+export const deleteUser = async (id: string) => {
+  await api.delete<void>(`/user/v1/${id}`);
+};
