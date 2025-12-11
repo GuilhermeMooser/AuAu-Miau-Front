@@ -2,7 +2,7 @@ import { commonFieldSchema } from "@/utils/schema";
 import z from "zod";
 
 export const loginSchema = z.object({
-  login: commonFieldSchema('O usuário é obrigatório.'),
+  email: commonFieldSchema('O email do usuário é obrigatório.'),
 
   password: commonFieldSchema('A senha é obrigatória.').min(
     8,

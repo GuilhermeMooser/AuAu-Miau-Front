@@ -26,7 +26,7 @@ export const useLogin = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      login: "",
+      email: "",
       password: "",
     },
   });
@@ -41,8 +41,8 @@ export const useLogin = () => {
   };
 
   const { mutate: loginMutate } = useMutation({
-    mutationFn: async ({ login, password }: LoginDto) => {
-      return (await authLogin({ login, password })).data;
+    mutationFn: async ({ email, password }: LoginDto) => {
+      return (await authLogin({ email, password })).data;
     },
     onSuccess: (data) => {
       authenticate(data);

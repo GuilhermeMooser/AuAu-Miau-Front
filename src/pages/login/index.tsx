@@ -70,21 +70,20 @@ export default function Login() {
             </CardHeader>
             <CardContent className="px-4 sm:px-6">
               <form
-                // onSubmit={handleSubmit(onSubmit)}
                 className="space-y-4"
               >
                 <div className="space-y-2">
-                  <Label htmlFor="username">Usuário</Label>
+                  <Label htmlFor="username">Email</Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder="Digite seu usuário"
-                    {...register("login")}
+                    placeholder="Digite seu email"
+                    {...register("email")}
                     className="bg-background border-border"
                   />
-                  {errors.login && (
+                  {errors.email && (
                     <p className="text-sm text-destructive">
-                      {errors.login.message}
+                      {errors.email.message}
                     </p>
                   )}
                 </div>

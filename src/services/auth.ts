@@ -2,10 +2,10 @@ import { Login, LoginDto } from "@/types/login";
 import { api } from "./api";
 import { logoutFront } from "@/utils/auth";
 
-export const authLogin = async ({ login, password }: LoginDto) => {
+export const authLogin = async ({ email, password }: LoginDto) => {
   const response = await api.post<Login>(
     "/auth/v1/login",
-    { login, password },
+    { email, password },
     {
       headers: {
         "Content-Type": "application/json",
