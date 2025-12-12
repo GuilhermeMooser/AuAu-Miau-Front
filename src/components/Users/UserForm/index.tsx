@@ -228,35 +228,37 @@ export default function UserForm({
                 )}
               />
             </div>
-            <div className="w-64">
-              <FormField
-                control={form.control}
-                name="active"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between rounded-2xl border p-4 shadow-sm hover:shadow-md transition-all">
-                      <div className="flex flex-col">
-                        <FormLabel className="text-sm font-medium">
-                          Status do usuário
-                        </FormLabel>
-                        <p className="text-xs text-muted-foreground">
-                          Defina se o usuário está ativo
-                        </p>
-                      </div>
+            {isEditing && (
+              <div className="w-64">
+                <FormField
+                  control={form.control}
+                  name="active"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between rounded-2xl border p-4 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex flex-col">
+                          <FormLabel className="text-sm font-medium">
+                            Status do usuário
+                          </FormLabel>
+                          <p className="text-xs text-muted-foreground">
+                            Defina se o usuário está ativo
+                          </p>
+                        </div>
 
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isReadOnly}
-                          className="rounded-md h-5 w-5"
-                        />
-                      </FormControl>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isReadOnly}
+                            className="rounded-md h-5 w-5"
+                          />
+                        </FormControl>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 
