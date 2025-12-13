@@ -1,7 +1,7 @@
 import z from "zod";
 import { Audit } from "./audit";
 import { Pagination } from "./pagination";
-import { userSchema } from "@/validations/User/schema";
+import { createUserSchema, updateUserSchema } from "@/validations/User/schema";
 
 export type UserLogin = {
   id: string;
@@ -47,10 +47,18 @@ export type CreateUserDto = {
   roleId: string;
 };
 
-export type UpdateUserDto = CreateUserDto & {
+export type UpdateUserDto = {
   id: string;
+  user: string;
+  cpf: string;
+  email: string;
+  password: string | undefined;
+  roleId: string;
+  active: boolean;
 };
 
 export type FindAllUsersPaginated = Pagination<MinimalUser>;
 
-export type UserFormData = z.infer<typeof userSchema>;
+export type CreateUserFormData = z.infer<typeof createUserSchema>;
+export type UpdateUserFormData = z.infer<typeof updateUserSchema>;
+export type UserFormData = CreateUserFormData | UpdateUserFormData;

@@ -40,7 +40,7 @@ export default function UserCard({
               className={`${
                 user.audit.deletedAt === null && user.active
                   ? "bg-success text-success-foreground"
-                  : "bg-muted text-muted-foreground"
+                  : "bg-red-600 hover:bg-red-700"
               }`}
             >
               {user.audit.deletedAt === null && user.active

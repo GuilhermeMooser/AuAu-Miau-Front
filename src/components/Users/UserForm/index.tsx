@@ -90,7 +90,7 @@ export default function UserForm({
                       className={`${
                         user?.active
                           ? "bg-success text-success-foreground"
-                          : "bg-muted text-muted-foreground"
+                          : "bg-red-600 hover:bg-red-700"
                       }`}
                     >
                       {user?.active ? "Ativo" : "Inativo"}

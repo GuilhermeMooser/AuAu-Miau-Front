@@ -1,5 +1,11 @@
-import { CreateUserDto, UpdateUserDto, UserFormData } from "@/types";
-import { userSchema } from "@/validations/User/schema";
+import {
+  CreateUserDto,
+  CreateUserFormData,
+  UpdateUserDto,
+  UpdateUserFormData,
+  UserFormData,
+} from "@/types";
+import { createUserSchema, updateUserSchema } from "@/validations/User/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { UserFormProps } from ".";
@@ -43,16 +49,27 @@ export const useUserForm = ({
   const { onError } = useFormError<UserFormData>();
   const { errorMessage, clearError, setErrorMessage } = useError();
 
-  const form = useForm<UserFormData>({
-    resolver: zodResolver(userSchema),
-    defaultValues: {
-      user: user?.name || "",
-      email: user?.email || "",
-      cpf: user?.cpf || "",
-      password: "",
-      roleId: user ? String(user.role.id) : "",
-      active: user?.active ? user?.active : true,
-    },
+  const schema = mode === "edit" ? updateUserSchema : createUserSchema;
+
+  const form = useForm<CreateUserFormData | UpdateUserFormData>({
+    resolver: zodResolver(schema),
+    defaultValues:
+      mode === "edit"
+        ? {
+            user: user?.name || "",
+            email: user?.email || "",
+            cpf: user?.cpf || "",
+            password: "",
+            roleId: user ? String(user.role.id) : "",
+            active: user?.active,
+          }
+        : {
+            user: "",
+            email: "",
+            cpf: "",
+            password: "",
+            roleId: "",
+          },
   });
 
   /** Fetch UserRolesData */
@@ -112,18 +129,40 @@ export const useUserForm = ({
   /** Actions */
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const handleButtonConfirm = (data: UserFormData) => {
+  const handleButtonConfirm = (
+    data: CreateUserFormData | UpdateUserFormData
+  ) => {
     if (mode === "create") {
-      createUserMutation(data);
+      const createData = data as CreateUserFormData;
+      createUserMutation({
+        user: createData.user,
+        cpf: createData.cpf,
+        email: createData.email,
+        password: createData.password,
+        roleId: createData.roleId,
+      });
     } else if (mode === "edit") {
       if (!user?.id) {
         setErrorMessage("O código do adotante não pode ser nulo");
         return;
       }
-      updateUserMutation({
+
+      const updateData = data as UpdateUserFormData;
+
+      const payload: UpdateUserDto = {
         id: user.id,
-        ...data,
-      });
+        user: updateData.user,
+        cpf: updateData.cpf,
+        email: updateData.email,
+        roleId: updateData.roleId,
+        active: updateData.active,
+        password:
+          updateData.password && updateData.password.trim() !== ""
+            ? updateData.password
+            : undefined,
+      };
+
+      updateUserMutation(payload);
     }
     setSubmitting(true);
   };
