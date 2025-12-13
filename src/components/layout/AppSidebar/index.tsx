@@ -28,7 +28,7 @@ const mainItems = [
 ];
 
 const adminItems = [
-  { title: "Contabilidade", url: "/contabilidade", icon: DollarSign },
+  // { title: "Contabilidade", url: "/contabilidade", icon: DollarSign },
   { title: "Usuários", url: "/admin/usuarios", icon: Settings },
 ];
 

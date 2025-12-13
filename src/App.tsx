@@ -84,7 +84,7 @@ const App = () => (
           />
 
           {/* Admin routes */}
-          <Route
+          {/* <Route
             path="/admin/contabilidade"
             element={
               <ProtectedRoute requiredRole={"Administrador"}>
@@ -100,7 +100,7 @@ const App = () => (
                 </DashboardLayout>
               </ProtectedRoute>
             }
-          />
+          /> */}
 
           <Route
             path="/admin/usuarios"
