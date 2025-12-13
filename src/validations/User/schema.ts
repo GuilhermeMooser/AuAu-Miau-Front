@@ -3,7 +3,12 @@ import z from "zod";
 const baseUserSchema = z.object({
   user: z.string().nonempty("Nome é obrigatório"),
   email: z.email("Email é obrigatório"),
-  cpf: z.string().min(11, "CPF inválido"),
+  cpf: z
+    .string()
+    .transform((value) => value.replace(/\D/g, "")) 
+    .refine((value) => value.length === 11, {
+      message: "CPF inválido",
+    }),
   roleId: z.string().nonempty("O tipo de usuário é obrigatório"),
 });
 
