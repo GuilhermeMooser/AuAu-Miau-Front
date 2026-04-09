@@ -117,7 +117,7 @@ export default function Users() {
         <Dialog open={isEditModalOpen} onOpenChange={handleCloseEditModalFn}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
             <DialogHeader>
-              <DialogTitle>Editar Adotante</DialogTitle>
+              <DialogTitle>Editar Usuário</DialogTitle>
             </DialogHeader>
             <UserForm
               mode="edit"
@@ -132,7 +132,7 @@ export default function Users() {
         <Dialog open={isViewModalOpen} onOpenChange={handleCloseViewModalFn}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
             <DialogHeader>
-              <DialogTitle>Detalhes do Adotante</DialogTitle>
+              <DialogTitle>Detalhes do Usuário</DialogTitle>
             </DialogHeader>
             <UserForm
               mode="view"

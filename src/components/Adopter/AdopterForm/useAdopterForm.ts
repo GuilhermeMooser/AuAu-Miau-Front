@@ -382,6 +382,7 @@ export const useAdopterForm = ({
         "Falha ao excluir o adotante",
         setErrorMessage,
       );
+      handleCloseDeleteAdopterModal();
     },
   });
 

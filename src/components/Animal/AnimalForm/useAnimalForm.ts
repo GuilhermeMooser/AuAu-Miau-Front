@@ -452,6 +452,7 @@ export const useAnimalForm = ({
         "Falha ao excluir o animal",
         setErrorMessage,
       );
+      handleCloseDeleteAnimalModal();
     },
   });
 
